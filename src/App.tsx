@@ -1,4 +1,8 @@
+import { useMemo, useState } from 'react'
 import './App.css'
+
+type View = 'home' | 'secure' | 'staff' | 'admin'
+type StaffState = 'needs_lookup' | 'draft_ready' | 'approved'
 
 const stats = [
   { value: '675+', label: 'retirement plans managed' },
@@ -16,31 +20,113 @@ const participantTasks = [
   'Contact ASC',
 ]
 
-const values = [
-  'Participants Come First',
-  'Uncompromising Ethics',
-  'Superior Products',
+const sampleSession = {
+  participant: 'Malia Santos',
+  employer: 'United Airlines',
+  plan: 'Sample United Airlines 401(k)',
+  topic: '401(k) loan inquiry',
+  intent: 'Participant-specific loan eligibility',
+  handoffReason: 'Requested personal borrowing amount and eligibility',
+  planRule: 'Loans allowed • 1 active loan maximum • 5-year general repayment term • final eligibility subject to plan documents and account status',
+  verifiedFacts: {
+    balance: '$100,000.00',
+    vestedBalance: '$100,000.00',
+    employmentStatus: 'Active employee',
+    activeLoans: '0 active loans',
+  },
+}
+
+const auditEvents = [
+  'Public ARIA detected account-specific question',
+  'Secure handoff token created',
+  'Participant completed demo verification',
+  'Staff review task opened',
+  'Relias lookup requested for balance and active loan count',
+  'Verified facts entered by ASC staff',
+  'ARIA draft generated from plan rules + verified facts',
+  'Staff approved supervised response',
 ]
 
 function App() {
+  const [view, setView] = useState<View>('home')
+  const [isVerified, setIsVerified] = useState(false)
+  const [staffState, setStaffState] = useState<StaffState>('needs_lookup')
+
+  const statusLabel = useMemo(() => {
+    if (staffState === 'approved') return 'Response approved and sent'
+    if (staffState === 'draft_ready') return 'AI draft ready for staff approval'
+    return 'Waiting on ASC associate / Relias lookup'
+  }, [staffState])
+
+  const goSecure = () => {
+    setView('secure')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const goStaff = () => {
+    setView('staff')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const goAdmin = () => {
+    setView('admin')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const goHome = () => {
+    setView('home')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <main className="site-shell">
       <nav className="top-nav" aria-label="Main navigation">
-        <a className="brand" href="#hero" aria-label="ASC Trust concept home">
+        <button className="brand brand-button" onClick={goHome} aria-label="ASC Trust concept home">
           <span className="brand-mark">ASC</span>
           <span>
             <strong>ASC Trust</strong>
-            <small>Digital Support Concept</small>
+            <small>ARIA Secure Support Concept</small>
           </span>
-        </a>
+        </button>
         <div className="nav-links" aria-label="Concept sections">
-          <a href="#participants">Participants</a>
-          <a href="#aria">ARIA</a>
-          <a href="#secure-support">Secure support</a>
+          <button onClick={goHome}>Public site</button>
+          <button onClick={goSecure}>Secure support</button>
+          <button onClick={goStaff}>Staff dashboard</button>
+          <button onClick={goAdmin}>Admin/audit</button>
         </div>
-        <a className="login-link" href="#secure-support">Account Login</a>
+        <button className="login-link" onClick={goSecure}>Continue securely</button>
       </nav>
 
+      {view === 'home' && <PublicSiteView onSecure={goSecure} onStaff={goStaff} />}
+      {view === 'secure' && (
+        <SecureSupportView
+          isVerified={isVerified}
+          setIsVerified={setIsVerified}
+          statusLabel={statusLabel}
+          onStaff={goStaff}
+        />
+      )}
+      {view === 'staff' && (
+        <StaffDashboardView
+          staffState={staffState}
+          setStaffState={setStaffState}
+          onSecure={goSecure}
+          onAdmin={goAdmin}
+        />
+      )}
+      {view === 'admin' && <AdminDashboardView staffState={staffState} onStaff={goStaff} />}
+
+      <footer className="site-footer">
+        <strong>ASC + ARIA Secure Support Concept</strong>
+        <span>Public ASC content + fake/sample participant workflow data only. Not connected to Relias, Airtable, or live AI.</span>
+      </footer>
+    </main>
+  )
+}
+
+function PublicSiteView({ onSecure, onStaff }: { onSecure: () => void; onStaff: () => void }) {
+  return (
+    <>
       <section id="hero" className="hero-section">
         <div className="hero-copy">
           <p className="eyebrow">Retirement Plan Leader in Micronesia</p>
@@ -50,23 +136,28 @@ function App() {
           </p>
           <div className="hero-actions" aria-label="Primary actions">
             <a className="primary-button" href="#participants">I’m a participant</a>
-            <a className="secondary-button" href="#employers">I’m an employer</a>
+            <button className="secondary-button" onClick={onStaff}>Preview staff flow</button>
           </div>
         </div>
 
-        <aside className="aria-preview-card" aria-label="ARIA preview">
+        <aside className="aria-preview-card" aria-label="ARIA secure handoff preview">
           <div className="card-topline">
             <span className="status-dot" />
-            <span>ARIA is ready</span>
+            <span>Public ARIA is online</span>
           </div>
-          <h2><span>Ask ASC’s</span><span>retirement support</span><span>assistant.</span></h2>
+          <h2><span>Helpful answers first.</span><span>Secure handoff when</span><span>it becomes personal.</span></h2>
           <div className="chat-window mini">
-            <p className="message user">Can I borrow from my 401(k)?</p>
+            <p className="message aria">Buenos! I can help with forms, general 401(k) questions, and next steps.</p>
+            <p className="message user">I work for United. How much can I borrow from my 401(k)?</p>
             <p className="message aria">
-              I can explain how 401(k) loans generally work. For account-specific eligibility, I’ll move you into secure support with ASC review.
+              To answer how much you may personally be eligible to borrow, ASC needs to verify your identity and account information securely.
             </p>
           </div>
-          <a className="text-link" href="#aria">See the ARIA flow →</a>
+          <div className="handoff-actions">
+            <button className="secure-button" onClick={onSecure}>Continue securely</button>
+            <button className="ghost-button">General info only</button>
+          </div>
+          <p className="fine-print">Public chat warns participants not to enter SSNs, account numbers, or private details before secure verification.</p>
         </aside>
       </section>
 
@@ -82,129 +173,282 @@ function App() {
       <section id="participants" className="split-section participant-section">
         <div>
           <p className="eyebrow">Participant support hub</p>
-          <h2>Give participants one clear place to start.</h2>
+          <h2>One clear place to start — before ARIA routes the complex parts.</h2>
           <p>
-            Public ASC content can be reorganized around the jobs participants actually need to complete: enroll, find forms, understand loans, read statements, and contact support.
+            The public experience stays safe and useful: education, routing, forms, and support paths. Account-specific questions move to authenticated support where staff can monitor and intervene.
           </p>
         </div>
         <div className="task-grid" aria-label="Participant task cards">
           {participantTasks.map((task) => (
-            <a href="#aria" className="task-card" key={task}>
+            <button onClick={task.includes('401') ? onSecure : undefined} className="task-card" key={task}>
               <span>{task}</span>
-              <small>Get help →</small>
-            </a>
+              <small>{task.includes('401') ? 'Try secure handoff →' : 'Get help →'}</small>
+            </button>
           ))}
         </div>
       </section>
 
-      <section id="employers" className="employer-section">
-        <div className="dark-panel">
-          <p className="eyebrow light">For employers and plan sponsors</p>
-          <h2>A premium digital front door for ASC’s full-service retirement plan support.</h2>
-          <p>
-            ASC designs, administers, consults on, and supports retirement plans for organizations across Guam, Saipan, and Micronesia — from plan design and compliance to recordkeeping, communications, investments, and trustee services.
-          </p>
-          <div className="value-row">
-            {values.map((value) => <span key={value}>{value}</span>)}
-          </div>
+      <section id="workflow" className="aria-section">
+        <div className="section-heading">
+          <p className="eyebrow">The safe handoff model</p>
+          <h2>Public chat is the front door. Secure ARIA is the private support room.</h2>
+        </div>
+        <div className="handoff-map" aria-label="Secure handoff workflow map">
+          {['Public question', 'Account-specific intent', 'Secure verification', 'Saved support session', 'Staff Relias bridge', 'Approved response'].map((step, index) => (
+            <div className="handoff-step" key={step}>
+              <span>{index + 1}</span>
+              <strong>{step}</strong>
+            </div>
+          ))}
         </div>
       </section>
+    </>
+  )
+}
 
-      <section id="aria" className="aria-section">
-        <div className="section-heading">
-          <p className="eyebrow">Public ARIA</p>
-          <h2>Helpful answers first. Secure handoff when it becomes personal.</h2>
-          <p>
-            ARIA should answer general questions on the public site, then route account-specific questions into a secure supervised workflow.
-          </p>
-        </div>
-        <div className="conversation-layout">
-          <div className="phone-frame" aria-label="Mobile ARIA conversation mockup">
-            <div className="phone-bar" />
-            <div className="chat-window">
-              <p className="message aria">Hi, I’m ARIA. I can help with retirement plan questions, forms, and next steps.</p>
-              <p className="message user">Can I borrow from my 401(k)?</p>
-              <p className="message aria">
-                I can explain common 401(k) loan rules. Your plan may vary, so I’ll keep this general unless you start secure support.
-              </p>
-              <button className="secure-button">Start secure support</button>
+function SecureSupportView({
+  isVerified,
+  setIsVerified,
+  statusLabel,
+  onStaff,
+}: {
+  isVerified: boolean
+  setIsVerified: (value: boolean) => void
+  statusLabel: string
+  onStaff: () => void
+}) {
+  return (
+    <section className="app-view secure-app-view">
+      <div className="view-heading">
+        <p className="eyebrow">Secure ARIA support</p>
+        <h1><span>Private support,</span><span>with staff oversight.</span></h1>
+        <p>
+          This proof of concept simulates the authenticated support room where messages are saved, staff can review, and account-specific questions can be handled safely.
+        </p>
+      </div>
+
+      {!isVerified ? (
+        <div className="auth-layout">
+          <div className="auth-card">
+            <span className="badge">Demo verification</span>
+            <h2>Continue to secure support</h2>
+            <p>
+              ARIA can explain general rules publicly, but loan eligibility and borrowing amounts require a private support session.
+            </p>
+            <div className="context-box">
+              <span>Handoff reason</span>
+              <strong>{sampleSession.handoffReason}</strong>
+              <small>Topic: {sampleSession.topic} • Employer: {sampleSession.employer}</small>
             </div>
+            <button className="primary-button" onClick={() => setIsVerified(true)}>Verify and continue</button>
           </div>
-
-          <div className="workflow-card">
-            <h3>What ARIA can safely do here</h3>
+          <div className="checklist-card">
+            <h3>Secure page adds</h3>
             <ul>
-              <li>Explain general retirement-plan concepts</li>
-              <li>Point participants to forms and contact paths</li>
-              <li>Route sensitive questions to secure support</li>
-              <li>Keep ASC staff in the loop for participant-specific guidance</li>
+              <li>Identity/verification boundary</li>
+              <li>Saved transcript and session status</li>
+              <li>Staff review queue visibility</li>
+              <li>Audit trail for sources and actions</li>
             </ul>
           </div>
         </div>
-      </section>
-
-      <section id="secure-support" className="secure-section">
-        <div className="section-heading narrow">
-          <p className="eyebrow">Secure supervised workflow</p>
-          <h2>Designed for sensitive participant questions.</h2>
-          <p>
-            This demo uses fake participant data only. In production, authentication, audit logs, approved scripts, and ASC review would be scoped separately.
-          </p>
-        </div>
-
-        <div className="dashboard-shell">
-          <div className="participant-panel">
-            <div className="panel-header">
-              <span>Participant view</span>
-              <strong>401(k) loan inquiry</strong>
+      ) : (
+        <div className="secure-session-grid">
+          <div className="secure-chat-card">
+            <div className="panel-header stacked">
+              <span>Verified participant</span>
+              <strong>{sampleSession.participant}</strong>
+              <small>{sampleSession.employer} • {sampleSession.plan}</small>
             </div>
-            <div className="verification-card">
-              <span className="badge">Demo verification</span>
-              <h3>David John</h3>
-              <p>Employer: Bank of Mila • Plan: Sample 401(k)</p>
-              <p className="fine-print">Sample data for concept demo. Not connected to Relias, Airtable, or ASC participant records.</p>
-            </div>
-            <div className="chat-window contained">
-              <p className="message user">Am I eligible to take a loan?</p>
-              <p className="message aria">
-                I’m checking this with ASC support. I can prepare a general explanation, but staff review is required before account-specific next steps.
-              </p>
+            <div className="session-status waiting">{statusLabel}</div>
+            <div className="chat-window contained tall">
+              <p className="message aria">You’re now in secure ARIA support. I’ll keep this session private and save the transcript for ASC review.</p>
+              <p className="message user">I work for United. How much can I borrow from my 401(k)?</p>
+              <p className="message aria">I found the sample plan-rule record for your employer, but ASC staff needs to verify your balance and active loan count before an account-specific response can be approved.</p>
+              <p className="message system-note">System: Staff review task created — Needs Relias Lookup.</p>
             </div>
           </div>
 
-          <div className="staff-panel">
-            <div className="panel-header">
-              <span>ASC staff review</span>
-              <strong>Human-in-the-loop</strong>
+          <aside className="support-side-card">
+            <h3>What moved from public chat</h3>
+            <div className="review-list compact">
+              <div><span>Intent</span><strong>{sampleSession.intent}</strong></div>
+              <div><span>Plan</span><strong>{sampleSession.employer}</strong></div>
+              <div><span>Next action</span><strong>Staff verifies Relias facts</strong></div>
             </div>
-            <div className="review-list">
-              <div><span>Verification</span><strong>Pending staff approval</strong></div>
-              <div><span>Workflow</span><strong>Loan eligibility explanation</strong></div>
-              <div><span>Data source</span><strong>Airtable plan rules + staff account check</strong></div>
-              <div><span>Response</span><strong>Drafted by ARIA, approved by ASC</strong></div>
+            <button className="approve-button" onClick={onStaff}>Open staff dashboard</button>
+          </aside>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function StaffDashboardView({
+  staffState,
+  setStaffState,
+  onSecure,
+  onAdmin,
+}: {
+  staffState: StaffState
+  setStaffState: (state: StaffState) => void
+  onSecure: () => void
+  onAdmin: () => void
+}) {
+  const showDraft = staffState === 'draft_ready' || staffState === 'approved'
+
+  return (
+    <section className="app-view staff-app-view">
+      <div className="view-heading compact-heading">
+        <p className="eyebrow">ASC staff dashboard</p>
+        <h1><span>Human-in-the-loop</span><span>support operations.</span></h1>
+        <p>
+          Call-center staff monitor secure chats, complete manual Relias lookups, enter structured verified facts, and approve or take over ARIA responses.
+        </p>
+      </div>
+
+      <div className="staff-grid">
+        <aside className="queue-panel">
+          <div className="panel-header stacked">
+            <span>Review queue</span>
+            <strong>4 active sessions</strong>
+          </div>
+          <QueueItem active name={sampleSession.participant} status="Needs Relias Lookup" topic="401(k) loan" />
+          <QueueItem name="Jon Reyes" status="AI Draft Ready" topic="Beneficiary update" />
+          <QueueItem name="Ana Cruz" status="Human Takeover" topic="Hardship question" />
+          <QueueItem name="Kai Flores" status="Resolved" topic="Find a form" />
+        </aside>
+
+        <div className="staff-detail-panel">
+          <div className="detail-topline">
+            <div>
+              <p className="eyebrow">Current session</p>
+              <h2>{sampleSession.participant}</h2>
+              <p>{sampleSession.employer} • {sampleSession.topic}</p>
             </div>
-            <button className="approve-button">Approve sample response</button>
+            <span className={`status-pill ${staffState}`}>{staffState === 'needs_lookup' ? 'Needs lookup' : staffState === 'draft_ready' ? 'Draft ready' : 'Approved'}</span>
+          </div>
+
+          <div className="staff-columns">
+            <div className="staff-card transcript-card">
+              <h3>Conversation</h3>
+              <div className="chat-window contained">
+                <p className="message user">How much can I borrow from my 401(k)?</p>
+                <p className="message aria">I need ASC staff to verify account-specific information before answering that.</p>
+                {showDraft && <p className="message aria">Draft ready: Based on the verified sample balance and plan rules, you may be eligible up to applicable plan/IRS limits. Final approval is subject to ASC review.</p>}
+                {staffState === 'approved' && <p className="message system-note">System: Staff approved response and sent it to the secure participant chat.</p>}
+              </div>
+            </div>
+
+            <div className="staff-card action-card">
+              <h3>Relias bridge + plan rules</h3>
+              <div className="context-box muted">
+                <span>Matched plan rule</span>
+                <strong>{sampleSession.planRule}</strong>
+              </div>
+              <div className="fact-grid">
+                <Fact label="Verified balance" value={sampleSession.verifiedFacts.balance} />
+                <Fact label="Vested balance" value={sampleSession.verifiedFacts.vestedBalance} />
+                <Fact label="Employment" value={sampleSession.verifiedFacts.employmentStatus} />
+                <Fact label="Existing loans" value={sampleSession.verifiedFacts.activeLoans} />
+              </div>
+              <p className="fine-print">Demo only: staff enters structured verified facts instead of typing sensitive data into a freeform AI prompt.</p>
+              <div className="button-row">
+                <button className="secondary-button" onClick={() => setStaffState('draft_ready')}>Generate ARIA draft</button>
+                <button className="primary-button" onClick={() => setStaffState('approved')}>Approve and send</button>
+              </div>
+              <div className="button-row secondary-row">
+                <button className="ghost-button">Edit response</button>
+                <button className="ghost-button">Take over chat</button>
+              </div>
+            </div>
+          </div>
+
+          <div className="handoff-actions lower-actions">
+            <button className="ghost-button" onClick={onSecure}>View participant secure chat</button>
+            <button className="ghost-button" onClick={onAdmin}>Open admin/audit view</button>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  )
+}
 
-      <section className="forms-section">
-        <div>
-          <p className="eyebrow">Resource organization</p>
-          <h2>Forms and services become easier to navigate.</h2>
-        </div>
-        <div className="resource-tags" aria-label="ASC form and service categories">
-          {['401(k)/403(b)', 'Guam College Savings Plan', 'IRA', 'Section 125', 'HSA', 'FSM / Palau / RMI Plans', 'Retirement Plans', 'Charitable Giving'].map((item) => (
-            <span key={item}>{item}</span>
-          ))}
-        </div>
-      </section>
+function AdminDashboardView({ staffState, onStaff }: { staffState: StaffState; onStaff: () => void }) {
+  return (
+    <section className="app-view admin-app-view">
+      <div className="view-heading compact-heading">
+        <p className="eyebrow">Admin + audit preview</p>
+        <h1><span>Oversight for</span><span>safe AI support.</span></h1>
+        <p>
+          Supervisors and compliance reviewers need visibility into sessions, source usage, staff actions, unanswered questions, and knowledge updates.
+        </p>
+      </div>
 
-      <footer className="site-footer">
-        <strong>ASC + ARIA Digital Support Concept</strong>
-        <span>Private proof of concept using public ASC content and sample-only workflow data.</span>
-      </footer>
-    </main>
+      <div className="admin-metrics">
+        <Metric value="18" label="active secure sessions" />
+        <Metric value="6" label="need staff review" />
+        <Metric value="2" label="high-risk escalations" />
+        <Metric value="98%" label="source-linked responses" />
+      </div>
+
+      <div className="admin-grid">
+        <div className="admin-card">
+          <div className="panel-header stacked">
+            <span>Sample audit trail</span>
+            <strong>{sampleSession.participant} • {staffState === 'approved' ? 'Approved' : 'In review'}</strong>
+          </div>
+          <ol className="audit-list">
+            {auditEvents.map((event, index) => (
+              <li key={event} className={index > 5 && staffState !== 'approved' ? 'muted-event' : ''}>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <strong>{event}</strong>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="admin-card governance-card">
+          <h3>Governance controls</h3>
+          <div className="review-list compact">
+            <div><span>Airtable sync</span><strong>Last checked 8:42 AM</strong></div>
+            <div><span>Knowledge source</span><strong>Plan rules v0.3 sample</strong></div>
+            <div><span>Auth mode</span><strong>Demo verification</strong></div>
+            <div><span>Model mode</span><strong>Scripted POC, no live AI</strong></div>
+            <div><span>Retention</span><strong>To be defined with ASC</strong></div>
+          </div>
+          <button className="approve-button" onClick={onStaff}>Return to staff review</button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function QueueItem({ name, status, topic, active = false }: { name: string; status: string; topic: string; active?: boolean }) {
+  return (
+    <button className={`queue-item ${active ? 'active' : ''}`}>
+      <span>{status}</span>
+      <strong>{name}</strong>
+      <small>{topic}</small>
+    </button>
+  )
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="fact-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  )
+}
+
+function Metric({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="metric-card">
+      <strong>{value}</strong>
+      <span>{label}</span>
+    </div>
   )
 }
 
