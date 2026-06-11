@@ -17,6 +17,7 @@ Talking points:
 - This is intentionally framed as an ASC Trust website modernization, not just a standalone chatbot demo.
 - ASC already has strong trust signals: scale, regional presence, retirement-plan credibility, partners, values, testimonials, and contact locations.
 - The opportunity is to keep that institutional trust while making the participant journey clearer, more mobile-friendly, and easier to route.
+- The imported content index shows how ASC’s 45 public pages/posts and public asset library could be reorganized into a searchable, source-linked information architecture.
 - ARIA should feel like part of ASC's support experience, not a random chatbot bolted onto the old site.
 
 ### 2. ARIA as the support layer

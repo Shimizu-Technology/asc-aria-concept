@@ -1,30 +1,29 @@
 # ASC public content and asset sources
 
-This branch turns the ARIA proof of concept into an ASC Trust website modernization concept. It uses a curated subset of public content and public image/logo assets from the existing ASC Trust website for private stakeholder review.
+This branch turns the ARIA proof of concept into an ASC Trust website modernization concept. It imports ASC Trust public sitemap content and public image/logo assets from the existing ASC Trust website for private stakeholder review.
 
 ## Source pages reviewed
 
-Public ASC Trust pages reviewed/scraped for copy, navigation, service categories, form categories, contact details, stats, and imagery:
+Public ASC Trust pages/posts were discovered from the WordPress public sitemaps and imported into a local manifest for review:
 
-- `https://www.asctrust.com/`
-- `https://www.asctrust.com/about-asc/our-story/`
-- `https://www.asctrust.com/about-asc/what-we-do/`
-- `https://www.asctrust.com/about-asc/our-mission-values/`
-- `https://www.asctrust.com/services/overview/`
-- `https://www.asctrust.com/serving-participants/take-control/`
-- `https://www.asctrust.com/serving-participants/stay-on-track/`
-- `https://www.asctrust.com/serving-participants/maximize-your-contributions/`
-- `https://www.asctrust.com/resources/forms/`
-- `https://www.asctrust.com/contact/`
+- `https://www.asctrust.com/wp-sitemap-posts-page-1.xml`
+- `https://www.asctrust.com/wp-sitemap-posts-post-1.xml`
 
-The scrape was intentionally limited to public pages and selected public media required for the proof-of-concept presentation.
+Imported result:
+
+- 45 public pages/posts represented in `src/ascSiteData.ts`
+- 131 public image references optimized into `public/asc-assets/full/`
+- Source URLs preserved per page and per image asset so ASC can review provenance
+
+The scrape was intentionally limited to publicly available ASC website pages/media. WordPress REST API access was blocked by site security, so public sitemap + HTML extraction was used instead.
 
 ## Local concept assets
 
-The private concept preview stores selected ASC public site assets under:
+The private concept preview stores ASC public site assets under:
 
 ```text
 public/asc-assets/
+public/asc-assets/full/
 ```
 
 Included asset types:
@@ -33,7 +32,10 @@ Included asset types:
 - team and participant imagery
 - current participant education/chart images
 - current core-value icons
+- service, investment, resources, media, and contact hero images
 - current partner-logo graphic
+
+The public UI shows a focused content-library slice by default and a 48-asset visual review mosaic, while the complete imported image set remains staged locally for ASC review.
 
 ## Usage boundary
 

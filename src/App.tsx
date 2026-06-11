@@ -1,5 +1,7 @@
+import type { MouseEvent } from 'react'
 import { useMemo, useState } from 'react'
 import './App.css'
+import { ascImageAssets, ascPages, ascSiteSections } from './ascSiteData'
 
 type View = 'home' | 'secure' | 'staff' | 'admin'
 type StaffState = 'needs_lookup' | 'draft_ready' | 'editing' | 'human_takeover' | 'approved'
@@ -31,6 +33,7 @@ const publicNavItems = [
   { label: 'Serving Participants', href: '#participants' },
   { label: 'Resources', href: '#resources' },
   { label: 'Forms', href: '#forms' },
+  { label: 'Site Map', href: '#content-index' },
 ]
 
 const services = [
@@ -243,6 +246,13 @@ function App() {
     scrollToTop()
   }
 
+  const goHomeSection = (sectionId: string) => {
+    setView('home')
+    window.setTimeout(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 0)
+  }
+
   const resetDemo = () => {
     setView('home')
     setIsVerified(false)
@@ -254,9 +264,9 @@ function App() {
   return (
     <main className="site-shell">
       <SiteHeader
-        view={view}
         goHome={goHome}
-        goSecure={() => goSecure({ freshHandoff: true })}
+        goHomeSection={goHomeSection}
+        goSecure={() => goSecure()}
         goStaff={goStaff}
         goAdmin={goAdmin}
         resetDemo={resetDemo}
@@ -289,29 +299,38 @@ function App() {
 }
 
 function SiteHeader({
-  view,
   goHome,
+  goHomeSection,
   goSecure,
   goStaff,
   goAdmin,
   resetDemo,
 }: {
-  view: View
   goHome: () => void
+  goHomeSection: (sectionId: string) => void
   goSecure: () => void
   goStaff: () => void
   goAdmin: () => void
   resetDemo: () => void
 }) {
+  const handleSectionClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!href.startsWith('#')) return
+
+    event.preventDefault()
+    goHomeSection(href.slice(1))
+  }
+
+  const openExternal = { target: '_blank', rel: 'noopener noreferrer' }
+
   return (
     <header className="asc-header">
       <div className="utility-bar" aria-label="ASC Trust utility navigation">
         <span>Private modernization concept for ASC review</span>
         <div className="utility-actions">
-          <a href="https://www.yourbenefitaccount.com/ascpac/">Account Login</a>
-          <a href="https://www.asctrust.com/serving-participants/enroll-now/">Open Account</a>
-          <a href="#contact">Contact Us</a>
-          <a href="https://www.asctrust.com/request-a-proposal/">Request Proposal</a>
+          <a href="https://www.yourbenefitaccount.com/ascpac/" {...openExternal}>Account Login</a>
+          <a href="https://www.asctrust.com/serving-participants/enroll-now/" {...openExternal}>Open Account</a>
+          <a href="#contact" onClick={(event) => handleSectionClick(event, '#contact')}>Contact Us</a>
+          <a href="https://www.asctrust.com/request-a-proposal/" {...openExternal}>Request Proposal</a>
         </div>
       </div>
 
@@ -322,7 +341,7 @@ function SiteHeader({
 
         <div className="public-nav-links" aria-label="ASC public site sections">
           {publicNavItems.map((item) => (
-            <a key={item.label} href={view === 'home' ? item.href : '#'} onClick={view === 'home' ? undefined : goHome}>
+            <a key={item.label} href={item.href} onClick={(event) => handleSectionClick(event, item.href)}>
               {item.label}
             </a>
           ))}
@@ -344,6 +363,15 @@ function PublicSiteView({ onSecure, onStaff }: { onSecure: () => void; onStaff: 
   const [showGeneralInfo, setShowGeneralInfo] = useState(false)
   const [selectedTask, setSelectedTask] = useState<ParticipantTask | null>(null)
   const [selectedFormCategory, setSelectedFormCategory] = useState<FormCategory>(formCategories[0])
+  const [contentFilter, setContentFilter] = useState('Services')
+
+  const visibleContentPages = useMemo(() => {
+    if (contentFilter === 'All') return ascPages
+    return ascPages.filter((page) => page.section === contentFilter)
+  }, [contentFilter])
+
+  const featuredContentPage = visibleContentPages[0] ?? ascPages[0]
+  const showcasedAssets = ascImageAssets.slice(0, 48)
 
   const handleTaskClick = (task: ParticipantTask) => {
     if (task.startsSecureHandoff) {
@@ -539,6 +567,84 @@ function PublicSiteView({ onSecure, onStaff }: { onSecure: () => void; onStaff: 
               <strong>{step}</strong>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section id="content-index" className="content-index-section">
+        <div className="section-heading compact">
+          <p className="eyebrow">Imported public ASC content</p>
+          <h2>The full public site becomes a clearer, searchable information architecture.</h2>
+          <p>
+            I pulled ASC’s public sitemap into this concept: {ascPages.length} public pages/posts and {ascImageAssets.length} optimized public image assets. The prototype keeps source links visible so ASC can approve, rewrite, or replace each item before production use.
+          </p>
+        </div>
+
+        <div className="content-filter-row" aria-label="Filter imported ASC pages">
+          <button className={contentFilter === 'All' ? 'active' : ''} onClick={() => setContentFilter('All')}>
+            All <span>{ascPages.length}</span>
+          </button>
+          {ascSiteSections.map((section) => (
+            <button
+              className={contentFilter === section.title ? 'active' : ''}
+              key={section.title}
+              onClick={() => setContentFilter(section.title)}
+            >
+              {section.title} <span>{section.count}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="content-library-layout">
+          <article className="featured-content-card">
+            {featuredContentPage.heroImage && (
+              <img src={featuredContentPage.heroImage} alt="" loading="lazy" aria-hidden="true" />
+            )}
+            <div>
+              <span className="badge">{featuredContentPage.section}</span>
+              <h3>{featuredContentPage.title}</h3>
+              <p>{featuredContentPage.summary}</p>
+              {featuredContentPage.highlights.length > 0 && (
+                <ul>
+                  {featuredContentPage.highlights.slice(0, 4).map((highlight) => <li key={highlight}>{highlight}</li>)}
+                </ul>
+              )}
+              <a className="source-link" href={featuredContentPage.sourceUrl} target="_blank" rel="noopener noreferrer">
+                View original source
+              </a>
+            </div>
+          </article>
+
+          <div className="content-page-grid" aria-live="polite">
+            {visibleContentPages.map((page) => (
+              <article className="content-page-card" key={page.slug}>
+                {page.heroImage && <img src={page.heroImage} alt="" loading="lazy" aria-hidden="true" />}
+                <div>
+                  <span>{page.section}</span>
+                  <h3>{page.title}</h3>
+                  <p>{page.summary}</p>
+                  <a href={page.sourceUrl} target="_blank" rel="noopener noreferrer">Original page</a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="asset-library-panel">
+          <div>
+            <p className="eyebrow">Visual library</p>
+            <h3>ASC imagery, logos, charts, icons, and team photos are staged for private review.</h3>
+            <p>
+              These are optimized copies of public ASC website assets. Production should use ASC-approved originals, alt text, and licensing confirmation. Showing {showcasedAssets.length} of {ascImageAssets.length} staged assets.
+            </p>
+          </div>
+          <div className="asset-mosaic" aria-label="Imported ASC public image assets">
+            {showcasedAssets.map((image) => (
+              <a href={image.sourceUrl} target="_blank" rel="noopener noreferrer" key={image.src} aria-label={`View source asset for ${image.label}`}>
+                <img src={image.src} alt="" loading="eager" decoding="async" />
+                <span>{image.label}</span>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 

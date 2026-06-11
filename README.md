@@ -18,6 +18,7 @@ See:
 ## Current prototype includes
 
 - ASC Trust website modernization concept using real public ASC structure, copy, imagery, logo, stats, values, forms, partners, and contact details
+- Imported public ASC content index covering 45 public pages/posts, with source links and a staged 131-image public asset library for private review
 - ASC-style responsive header with Account Login, Open Account, Contact Us, Request Proposal, public navigation, and discreet demo controls
 - Participant support hub task cards
 - Public ARIA assistant concept with account-specific secure handoff
