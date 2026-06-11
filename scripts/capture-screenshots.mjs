@@ -1,7 +1,10 @@
+import { mkdir } from 'node:fs/promises'
 import { launchBrowser } from './chrome-launcher.mjs'
 
 const base = process.env.CHECK_URL || 'http://127.0.0.1:5173'
 const outDir = process.env.SCREENSHOT_DIR || '/tmp'
+
+await mkdir(outDir, { recursive: true })
 
 const browser = await launchBrowser()
 
