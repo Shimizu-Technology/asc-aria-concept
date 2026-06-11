@@ -1,6 +1,6 @@
 # ASC + ARIA architecture and RAG plan
 
-**Status:** planning direction for a production-shaped proof of concept  
+**Status:** planning direction for a production-shaped prototype  
 **Last updated:** 2026-06-11  
 **Related docs:** `docs/asc-public-content.md`
 
@@ -89,7 +89,7 @@ Responsibilities:
 Prototype options:
 
 - Clerk if polished third-party login is needed quickly
-- Rails/JWT demo auth if simpler for the proof of concept
+- Rails/JWT demo auth if simpler for the prototype
 
 Production principle:
 
@@ -356,7 +356,7 @@ ARIA should:
 - log source IDs, prompt versions, and staff actions
 - use disclaimers approved by ASC/compliance
 
-## Proof-of-concept scope using this architecture
+## Prototype scope using this architecture
 
 The current public prototype can be evolved without becoming throwaway.
 
@@ -365,7 +365,7 @@ Next POC build direction:
 1. Convert/organize toward a production-shaped monorepo:
 
 ```text
-asc-aria-concept/
+asc-aria/
   web/       # React/Vite frontend
   api/       # Rails API, when backend work begins
   docs/      # architecture, data boundaries, demo script

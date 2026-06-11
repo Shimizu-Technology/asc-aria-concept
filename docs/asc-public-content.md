@@ -1,6 +1,6 @@
 # Public ASC Trust content used in this concept
 
-This prototype intentionally uses public information from ASC Trust's current website, then reorganizes it into a premium proof-of-concept experience.
+This prototype intentionally uses public information from ASC Trust's current website, then reorganizes it into a premium digital support experience.
 
 ## Source pages checked
 

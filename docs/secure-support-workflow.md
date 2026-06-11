@@ -441,7 +441,7 @@ Examples:
 
 ## POC demonstration scope
 
-The proof of concept should simulate the full workflow without real sensitive data.
+The prototype should simulate the full workflow without real sensitive data.
 
 Recommended POC screens:
 

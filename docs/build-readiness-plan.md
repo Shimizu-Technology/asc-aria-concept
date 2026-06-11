@@ -2,7 +2,7 @@
 
 > **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task once Leon approves build start.
 
-**Goal:** Turn the current ASC + ARIA concept into a production-shaped proof of concept that demonstrates public ARIA, secure authenticated handoff, staff review, Relias-bridge workflow, and admin/audit oversight using fake/sample data.
+**Goal:** Turn the current ASC + ARIA concept into a production-shaped prototype that demonstrates public ARIA, secure authenticated handoff, staff review, Relias-bridge workflow, and admin/audit oversight using fake/sample data.
 
 **Architecture:** Keep the current public React/Vite prototype as the visual base. Add a secure-support workflow and staff/admin dashboard screens in React first. Add Rails API only when persistence, role-based staff workflows, audit events, and realistic data modeling become necessary for the paid pilot / stronger POC.
 
@@ -15,7 +15,7 @@
 Already done:
 
 - React/Vite ASC + ARIA concept exists.
-- Public GitHub repo exists: `https://github.com/Shimizu-Technology/asc-aria-concept`
+- Public GitHub repo exists: `https://github.com/Shimizu-Technology/asc-aria`
 - Public ASC content/numbers documented in `docs/asc-public-content.md`.
 - Long-term architecture/RAG direction documented in `docs/architecture-and-rag-plan.md`.
 - Secure handoff/staff workflow documented in `docs/secure-support-workflow.md`.

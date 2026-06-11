@@ -1,6 +1,6 @@
-# ASC + ARIA Digital Support Concept
+# ASC + ARIA Digital Support
 
-Private proof-of-concept prototype for the ASC Trust / ARIA opportunity.
+Private digital support prototype for the ASC Trust / ARIA opportunity.
 
 ## Purpose
 
@@ -58,12 +58,12 @@ node scripts/mobile-check.mjs
 
 The check scripts use local Chrome via `puppeteer-core` to verify mobile/desktop viewport dimensions and capture screenshots in `/tmp`. Set `CHECK_URL` if the dev server is running on a non-default port.
 
-## Capture proof-of-concept screenshots
+## Capture prototype screenshots
 
 With the dev server running:
 
 ```bash
-node scripts/capture-poc-screenshots.mjs
+node scripts/capture-screenshots.mjs
 ```
 
 Generated screenshot files:
