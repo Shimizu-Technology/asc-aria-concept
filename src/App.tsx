@@ -646,7 +646,7 @@ function PublicSiteView({ onSecure }: { onSecure: () => void }) {
           <div className="asset-mosaic" aria-label="ASC image gallery">
             {showcasedAssets.map((image) => (
               <a href={image.sourceUrl} target="_blank" rel="noopener noreferrer" key={image.src} aria-label={`View ASC image: ${image.label}`}>
-                <img src={image.src} alt="" loading="eager" decoding="async" />
+                <img src={image.src} alt="" loading="lazy" decoding="async" />
               </a>
             ))}
           </div>
