@@ -61,4 +61,4 @@ The prototype rounds these into card-friendly labels:
 
 ## Important demo boundary
 
-All participant names, employer names, verification states, loan workflow details, account context, and staff-review content are fake sample data for concept purposes only. The prototype is not connected to ASC systems, Relias, Airtable, participant records, real authentication, or real AI services.
+All participant names, employer names, verification states, loan workflow details, account context, and staff-review content are fake sample data for concept purposes only. The prototype uses fictional sample employers such as `Bank of Mila` for account-specific flows. It is not connected to ASC systems, Relias, Airtable, participant records, real authentication, or real AI services.

@@ -1,10 +1,10 @@
 # ASC + ARIA Digital Support
 
-Private digital support prototype for the ASC Trust / ARIA opportunity.
+Digital support prototype for the ASC Trust / ARIA opportunity.
 
 ## Purpose
 
-This is a lightweight React/Vite concept, not production code. It uses public ASC Trust content and sample-only participant workflow data to show how a modern ASC website, participant support hub, public ARIA assistant, and secure supervised support flow could fit together.
+This is a lightweight React/Vite concept, not production code. It is intended for stakeholder review and uses public ASC Trust content plus fake/sample participant workflow data to show how a modern ASC website, participant support hub, public ARIA assistant, and secure supervised support flow could fit together.
 
 See:
 
@@ -12,6 +12,7 @@ See:
 - `docs/architecture-and-rag-plan.md` for the recommended long-term React + Rails + Airtable/RAG architecture.
 - `docs/secure-support-workflow.md` for the public-to-authenticated ARIA handoff, staff dashboard, Relias bridge, and admin/audit model.
 - `docs/build-readiness-plan.md` for the recommended phased build sequence and acceptance criteria.
+- `docs/demo-script.md` for the recommended 3–5 minute stakeholder walkthrough.
 
 ## Current prototype includes
 
@@ -66,7 +67,7 @@ With the dev server running:
 node scripts/capture-screenshots.mjs
 ```
 
-Generated screenshot files:
+The script reads `CHECK_URL` and defaults to `http://127.0.0.1:5173`. Generated screenshot files:
 
 - `/tmp/asc-aria-01-public-handoff.png`
 - `/tmp/asc-aria-02-secure-auth.png`

@@ -134,9 +134,9 @@ Neon     -> PostgreSQL
 Render   -> optional FastAPI AI service later, if needed
 ```
 
-## Source systems from Mel's meeting
+## Source systems from discovery notes
 
-Mel described two ASC systems relevant to ARIA:
+Discovery notes describe two ASC systems relevant to ARIA:
 
 ### Relias
 
@@ -153,7 +153,7 @@ Mel described two ASC systems relevant to ARIA:
   - plan allows no loans
   - plan allows one loan
   - plan allows two loans
-  - plan-specific nuances for United, Bank of Guam, Pay-Less, etc.
+  - plan-specific nuances for each employer plan, using only ASC-approved or sanitized source records in prototypes
 - less sensitive than Relias because it is rules/reference data rather than personal account data
 - practical first integration target
 
@@ -200,10 +200,10 @@ Rails should query these rules directly.
 Example:
 
 ```text
-User: "I work for United. Can I take two loans?"
+User: "I work for Bank of Mila. Can I take two loans?"
 
 Rails:
-1. identify employer/plan = United
+1. identify employer/plan = Bank of Mila sample plan
 2. query structured plan rules
 3. check max active loans
 4. retrieve explanatory context

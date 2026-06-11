@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer-core'
 
-const base = 'http://127.0.0.1:5174'
-const outDir = '/tmp'
+const base = process.env.CHECK_URL || 'http://127.0.0.1:5173'
+const outDir = process.env.SCREENSHOT_DIR || '/tmp'
 
 const browser = await puppeteer.launch({
   executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
