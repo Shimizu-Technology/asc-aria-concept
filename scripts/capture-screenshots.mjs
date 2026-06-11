@@ -13,14 +13,29 @@ async function pause(ms = 350) {
 }
 
 async function clickByText(page, text) {
-  const clicked = await page.evaluate((targetText) => {
+  const result = await page.evaluate((targetText) => {
     const candidates = [...document.querySelectorAll('button, a')]
     const el = candidates.find((node) => node.textContent?.trim().includes(targetText))
-    if (!el) return false
+    if (!el) return { clicked: false, reason: 'not_found' }
+
+    const isDisabled =
+      el.matches(':disabled') ||
+      el.getAttribute('aria-disabled') === 'true' ||
+      el.getAttribute('disabled') !== null
+
+    if (isDisabled) {
+      return { clicked: false, reason: 'disabled', label: el.textContent?.trim() }
+    }
+
     el.click()
-    return true
+    return { clicked: true }
   }, text)
-  if (!clicked) throw new Error(`Could not click: ${text}`)
+
+  if (!result.clicked) {
+    const detail = result.reason === 'disabled' ? `Matched control is disabled: ${result.label}` : 'No matching control found'
+    throw new Error(`Could not click: ${text}. ${detail}`)
+  }
+
   await pause()
 }
 
