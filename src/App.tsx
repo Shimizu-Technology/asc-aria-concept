@@ -406,6 +406,7 @@ function StaffDashboardView({
   const canApprove = showDraft && staffState !== 'approved'
   const canGenerateDraft = staffState !== 'approved' && staffState !== 'human_takeover' && staffState !== 'editing'
   const canEdit = showDraft && staffState !== 'approved'
+  const canTakeOver = staffState !== 'approved' && staffState !== 'human_takeover'
 
   const generateDraft = () => {
     setDraftText(defaultDraftText)
@@ -495,7 +496,9 @@ function StaffDashboardView({
                 ) : (
                   <button className="ghost-button" onClick={() => setStaffState('editing')} disabled={!canEdit}>Edit response</button>
                 )}
-                <button className="ghost-button" onClick={() => setStaffState('human_takeover')} disabled={staffState === 'approved'}>Take over chat</button>
+                <button className="ghost-button" onClick={() => setStaffState('human_takeover')} disabled={!canTakeOver}>
+                  {staffState === 'human_takeover' ? 'Takeover active' : 'Take over chat'}
+                </button>
               </div>
             </div>
           </div>
