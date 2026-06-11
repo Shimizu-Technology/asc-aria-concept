@@ -1,27 +1,41 @@
-import puppeteer from 'puppeteer-core'
+import { mkdir } from 'node:fs/promises'
+import { launchBrowser } from './chrome-launcher.mjs'
 
-const base = 'http://127.0.0.1:5174'
-const outDir = '/tmp'
+const base = process.env.CHECK_URL || 'http://127.0.0.1:5173'
+const outDir = process.env.SCREENSHOT_DIR || '/tmp'
 
-const browser = await puppeteer.launch({
-  executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  headless: true,
-  args: ['--no-sandbox'],
-})
+await mkdir(outDir, { recursive: true })
+
+const browser = await launchBrowser()
 
 async function pause(ms = 350) {
   await new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 async function clickByText(page, text) {
-  const clicked = await page.evaluate((targetText) => {
+  const result = await page.evaluate((targetText) => {
     const candidates = [...document.querySelectorAll('button, a')]
     const el = candidates.find((node) => node.textContent?.trim().includes(targetText))
-    if (!el) return false
+    if (!el) return { clicked: false, reason: 'not_found' }
+
+    const isDisabled =
+      el.matches(':disabled') ||
+      el.getAttribute('aria-disabled') === 'true' ||
+      el.getAttribute('disabled') !== null
+
+    if (isDisabled) {
+      return { clicked: false, reason: 'disabled', label: el.textContent?.trim() }
+    }
+
     el.click()
-    return true
+    return { clicked: true }
   }, text)
-  if (!clicked) throw new Error(`Could not click: ${text}`)
+
+  if (!result.clicked) {
+    const detail = result.reason === 'disabled' ? `Matched control is disabled: ${result.label}` : 'No matching control found'
+    throw new Error(`Could not click: ${text}. ${detail}`)
+  }
+
   await pause()
 }
 
@@ -76,4 +90,4 @@ async function captureMobile() {
 await captureDesktop()
 await captureMobile()
 await browser.close()
-console.log('screenshots saved to /tmp/asc-aria-*.png')
+console.log(`screenshots saved to ${outDir}/asc-aria-*.png`)

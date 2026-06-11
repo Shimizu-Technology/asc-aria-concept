@@ -1,12 +1,8 @@
-import puppeteer from 'puppeteer-core'
+import { launchBrowser } from './chrome-launcher.mjs'
 
 const url = process.env.CHECK_URL || 'http://127.0.0.1:5173'
 
-const browser = await puppeteer.launch({
-  executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  headless: true,
-  args: ['--no-sandbox'],
-})
+const browser = await launchBrowser()
 const page = await browser.newPage()
 await page.setViewport({ width: 390, height: 1400, deviceScaleFactor: 1 })
 await page.goto(url, { waitUntil: 'networkidle0' })

@@ -50,6 +50,7 @@ a {
 
 .brand,
 .nav-links,
+.nav-actions,
 .hero-actions,
 .handoff-actions,
 .button-row {
@@ -120,14 +121,32 @@ a {
   color: var(--blue);
 }
 
-.login-link {
-  border: 1px solid rgba(39, 110, 241, 0.2);
+.nav-actions {
+  gap: 0.5rem;
+}
+
+.login-link,
+.reset-link {
   border-radius: 999px;
-  color: var(--blue);
   font-weight: 800;
   padding: 0.72rem 1rem;
   background: rgba(255, 255, 255, 0.72);
   cursor: pointer;
+}
+
+.login-link {
+  border: 1px solid rgba(39, 110, 241, 0.2);
+  color: var(--blue);
+}
+
+.reset-link {
+  border: 1px solid transparent;
+  color: #52637f;
+}
+
+.reset-link:hover {
+  border-color: rgba(6, 27, 49, 0.12);
+  color: var(--navy);
 }
 
 .hero-section {
@@ -251,6 +270,19 @@ h1 span,
   box-shadow: rgba(39, 110, 241, 0.35) 0 20px 35px -18px;
 }
 
+button:focus-visible,
+a:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(39, 110, 241, 0.38);
+  outline-offset: 3px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+  box-shadow: none;
+}
+
 .secondary-button,
 .ghost-button {
   border: 1px solid rgba(6, 27, 49, 0.12);
@@ -293,10 +325,32 @@ h1 span,
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1.2rem;
-  color: #108c3d;
+  margin-bottom: 0.8rem;
+  color: #087436;
   font-size: 0.82rem;
   font-weight: 850;
+}
+
+.acronym-box {
+  display: grid;
+  gap: 0.2rem;
+  margin-bottom: 1.1rem;
+  border: 1px solid rgba(39, 110, 241, 0.14);
+  border-radius: 18px;
+  padding: 0.78rem 0.9rem;
+  background: #f7faff;
+}
+
+.acronym-box span {
+  color: var(--blue);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.acronym-box strong {
+  color: var(--navy);
+  font-size: 0.94rem;
 }
 
 .status-dot {
@@ -361,6 +415,85 @@ h1 span,
   background: #fffdf3;
   color: #7c5d12;
   font-size: 0.88rem;
+}
+
+.message.staff {
+  align-self: flex-start;
+  border: 1px solid rgba(21, 190, 83, 0.22);
+  background: rgba(21, 190, 83, 0.1);
+  color: #075f2d;
+  border-bottom-left-radius: 6px;
+}
+
+.inline-info-card,
+.compliance-notice,
+.selected-task-card,
+.draft-box {
+  display: grid;
+  gap: 0.45rem;
+  border-radius: 18px;
+  padding: 0.9rem;
+}
+
+.inline-info-card,
+.selected-task-card {
+  margin-top: 0.85rem;
+  border: 1px solid rgba(39, 110, 241, 0.16);
+  background: #f7faff;
+}
+
+.inline-info-card strong,
+.selected-task-card strong,
+.compliance-notice strong,
+.draft-box span {
+  color: var(--navy);
+}
+
+.inline-info-card span,
+.selected-task-card p,
+.compliance-notice span,
+.draft-box p {
+  margin: 0;
+  color: var(--slate);
+  font-size: 0.9rem;
+  line-height: 1.48;
+}
+
+.selected-task-card span,
+.draft-box span {
+  color: var(--blue);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.compliance-notice {
+  margin-top: 0.85rem;
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  background: #fffbeb;
+}
+
+.compliance-notice.compact {
+  padding: 0.78rem 0.85rem;
+}
+
+.draft-box {
+  margin: 1rem 0;
+  border: 1px solid rgba(39, 110, 241, 0.18);
+  background: #f7faff;
+}
+
+.draft-box textarea {
+  min-height: 168px;
+  width: 100%;
+  resize: vertical;
+  border: 1px solid rgba(39, 110, 241, 0.2);
+  border-radius: 14px;
+  padding: 0.85rem;
+  color: var(--navy);
+  background: #ffffff;
+  line-height: 1.5;
 }
 
 .fine-print,
@@ -438,8 +571,7 @@ small {
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
-.task-card:hover,
-.queue-item:hover {
+.task-card:hover {
   transform: translateY(-3px);
 }
 
@@ -597,9 +729,25 @@ small {
   font-weight: 850;
 }
 
-.session-status.waiting {
+.session-status.needs_lookup {
   background: #fff8e6;
   color: #9a6200;
+}
+
+.session-status.draft_ready,
+.session-status.editing {
+  background: #eef4ff;
+  color: var(--blue);
+}
+
+.session-status.human_takeover {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.session-status.approved {
+  background: rgba(21, 190, 83, 0.12);
+  color: #087436;
 }
 
 .review-list {
@@ -645,9 +793,7 @@ small {
   border-radius: 22px;
   padding: 1rem;
   background: #ffffff;
-  cursor: pointer;
   text-align: left;
-  transition: transform 180ms ease;
 }
 
 .queue-item.active {
@@ -697,9 +843,19 @@ small {
   color: var(--blue);
 }
 
+.status-pill.editing {
+  background: #eef4ff;
+  color: var(--blue);
+}
+
+.status-pill.human_takeover {
+  background: #fff1f2;
+  color: #be123c;
+}
+
 .status-pill.approved {
   background: rgba(21, 190, 83, 0.12);
-  color: #108c3d;
+  color: #087436;
 }
 
 .staff-columns {

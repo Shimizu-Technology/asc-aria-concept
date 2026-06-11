@@ -26,14 +26,14 @@ Do not jump directly into a full production backend unless the goal is a paid pi
 
 Recommended next build sequence:
 
-1. **Frontend product prototype** — fastest way to show the right workflow to Mel/ASC.
+1. **Frontend product prototype** — fastest way to show the right workflow to ASC stakeholders.
 2. **Rails API vertical slice** — once we want persistence, roles, queues, audit events, and realistic backend architecture.
 3. **Airtable/RAG integration** — once ASC provides sample Airtable schema/export or approves use of real/sanitized data.
 4. **Security/auth hardening** — once ASC requirements and identity-provider path are known.
 
 ## What we need before building the real backend
 
-From Mel/ASC:
+From ASC stakeholders:
 
 - sample Airtable schema or sanitized export
 - list of top 10-20 participant questions
@@ -58,7 +58,7 @@ Build a **frontend-only workflow prototype** of the secure handoff + staff dashb
 
 Reason:
 
-- Mel/ASC need to react to the product workflow first.
+- ASC stakeholders need to react to the product workflow first.
 - No real participant data is available yet.
 - Relias integration is not available.
 - Airtable schema/data is not available yet.
@@ -132,7 +132,7 @@ node scripts/mobile-check.mjs
 **Steps:**
 
 1. Add a sample public chat conversation:
-   - User asks: “I work for United. How much can I borrow from my 401(k)?”
+   - User asks: “I work for Bank of Mila. How much can I borrow from my 401(k)?”
    - ARIA explains that secure support is required.
 2. Add buttons:
    - `Continue securely`
@@ -158,7 +158,7 @@ node scripts/mobile-check.mjs
    - button: `Verify and continue`
 2. Preserve context from the public question visually:
    - topic: 401(k) loan
-   - employer: United Airlines sample
+   - employer: Bank of Mila sample
    - reason: account-specific support requested
 3. Button moves to secure chat view.
 4. Run build and viewport checks.
@@ -267,7 +267,7 @@ node scripts/mobile-check.mjs
 
 ## Task 8: Update docs/demo script
 
-**Objective:** Document how to present the secure workflow prototype to Mel/ASC.
+**Objective:** Document how to present the secure workflow prototype to ASC stakeholders.
 
 **Files:**
 
@@ -415,4 +415,4 @@ It will answer the most important stakeholder question:
 
 > Does this secure handoff + staff-reviewed ARIA workflow make sense operationally for ASC?
 
-Once Mel/ASC reacts positively, graduate to the Rails-backed vertical slice and formalize the pilot scope.
+Once ASC stakeholders react positively, graduate to the Rails-backed vertical slice and formalize the pilot scope.

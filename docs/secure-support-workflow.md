@@ -462,6 +462,6 @@ POC data must remain fake/sample/sanitized.
 
 ## Final product framing
 
-Use this language with Mel/ASC:
+Use this language with ASC stakeholders:
 
 > ARIA starts as a public assistant for general education and routing. When a participant asks something account-specific, ARIA moves them into a secure authenticated support session. From there, ASC staff can monitor, verify Relias information manually when needed, approve AI-drafted responses, or take over the conversation. Every message, source, staff action, and response is saved in an audit trail.
