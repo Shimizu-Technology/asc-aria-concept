@@ -6,7 +6,10 @@ Private proof-of-concept prototype for the ASC Trust / ARIA opportunity.
 
 This is a lightweight React/Vite concept, not production code. It uses public ASC Trust content and sample-only participant workflow data to show how a modern ASC website, participant support hub, public ARIA assistant, and secure supervised support flow could fit together.
 
-See `docs/asc-public-content.md` for the public ASC Trust pages/content checked and the demo-data boundary.
+See:
+
+- `docs/asc-public-content.md` for the public ASC Trust pages/content checked and the demo-data boundary.
+- `docs/architecture-and-rag-plan.md` for the recommended long-term React + Rails + Airtable/RAG architecture.
 
 ## Current prototype includes
 
