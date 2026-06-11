@@ -72,4 +72,4 @@ async function captureMobile() {
 await captureDesktop()
 await captureMobile()
 await browser.close()
-console.log('screenshots saved to /tmp/asc-aria-*.png')
+console.log(`screenshots saved to ${outDir}/asc-aria-*.png`)
