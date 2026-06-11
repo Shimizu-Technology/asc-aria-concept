@@ -57,7 +57,7 @@ node scripts/desktop-check.mjs
 node scripts/mobile-check.mjs
 ```
 
-The check scripts use local Chrome via `puppeteer-core` to verify mobile/desktop viewport dimensions and capture screenshots in `/tmp`. Set `CHECK_URL` if the dev server is running on a non-default port.
+The check scripts use local Chrome/Chromium via `puppeteer-core` to verify mobile/desktop viewport dimensions and capture screenshots in `/tmp`. Set `CHECK_URL` if the dev server is running on a non-default port. Set `CHROME_PATH` or `PUPPETEER_EXECUTABLE_PATH` if Chrome/Chromium is not installed in a standard macOS, Linux, or Windows location.
 
 ## Capture prototype screenshots
 
@@ -67,7 +67,7 @@ With the dev server running:
 node scripts/capture-screenshots.mjs
 ```
 
-The script reads `CHECK_URL` and defaults to `http://127.0.0.1:5173`. Generated screenshot files:
+The script reads `CHECK_URL` and defaults to `http://127.0.0.1:5173`. Set `SCREENSHOT_DIR` to override the output directory and `CHROME_PATH` or `PUPPETEER_EXECUTABLE_PATH` to point at a custom Chrome/Chromium executable. Generated screenshot files:
 
 - `/tmp/asc-aria-01-public-handoff.png`
 - `/tmp/asc-aria-02-secure-auth.png`

@@ -1,13 +1,9 @@
-import puppeteer from 'puppeteer-core'
+import { launchBrowser } from './chrome-launcher.mjs'
 
 const base = process.env.CHECK_URL || 'http://127.0.0.1:5173'
 const outDir = process.env.SCREENSHOT_DIR || '/tmp'
 
-const browser = await puppeteer.launch({
-  executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  headless: true,
-  args: ['--no-sandbox'],
-})
+const browser = await launchBrowser()
 
 async function pause(ms = 350) {
   await new Promise((resolve) => setTimeout(resolve, ms))
