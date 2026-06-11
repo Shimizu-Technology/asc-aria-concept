@@ -10,6 +10,8 @@ See:
 
 - `docs/asc-public-content.md` for the public ASC Trust pages/content checked and the demo-data boundary.
 - `docs/architecture-and-rag-plan.md` for the recommended long-term React + Rails + Airtable/RAG architecture.
+- `docs/secure-support-workflow.md` for the public-to-authenticated ARIA handoff, staff dashboard, Relias bridge, and admin/audit model.
+- `docs/build-readiness-plan.md` for the recommended phased build sequence and acceptance criteria.
 
 ## Current prototype includes
 
