@@ -445,7 +445,11 @@ function PublicSiteView({ onSecure }: { onSecure: () => void }) {
     setChatStatus(null)
 
     try {
-      const session = chatSession ?? await createPublicChatSession()
+      const session = chatSession ?? await (async () => {
+        const newSession = await createPublicChatSession()
+        setChatSession(newSession)
+        return newSession
+      })()
       const updatedSession = await sendPublicChatMessage(session.token, content)
       setChatSession(updatedSession)
       setChatInput('')
