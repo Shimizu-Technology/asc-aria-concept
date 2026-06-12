@@ -147,13 +147,12 @@ knowledge_entries.each do |attributes|
   entry.save!
 end
 
-AuditEvent.record!(
-  action: "prototype_seeded",
-  actor: supervisor,
-  metadata: {
-    message: "Seeded fake users, fake Airtable-style plan rules, and controlled ARIA knowledge entries.",
-    fake_data_only: true
-  }
-)
+prototype_seed_event = AuditEvent.find_or_initialize_by(action: "prototype_seeded", actor: supervisor)
+prototype_seed_event.metadata = {
+  message: "Seeded fake users, fake Airtable-style plan rules, and controlled ARIA knowledge entries.",
+  fake_data_only: true
+}
+prototype_seed_event.occurred_at ||= Time.current
+prototype_seed_event.save!
 
 puts "Seeded #{Role.count} roles, #{User.count} users, #{PlanRule.count} plan rules, #{KnowledgeEntry.count} knowledge entries."
