@@ -16,6 +16,8 @@ module Api
           render_not_found("Public chat session not found")
         rescue ActionController::ParameterMissing, ArgumentError => e
           render json: { error: e.message }, status: :unprocessable_entity
+        rescue ActiveRecord::RecordInvalid => e
+          render json: { error: e.record.errors.full_messages.to_sentence }, status: :unprocessable_entity
         end
 
         private

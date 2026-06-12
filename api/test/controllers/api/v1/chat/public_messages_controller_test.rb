@@ -40,6 +40,16 @@ class Api::V1::Chat::PublicMessagesControllerTest < ActionDispatch::IntegrationT
     assert_includes assistant_message.fetch("content"), "continue securely"
   end
 
+  test "rejects overlong message" do
+    post api_v1_chat_public_session_messages_url(public_chat_sessions(:open_session).token), params: {
+      message: { content: "a" * 2_001 }
+    }
+
+    assert_response :unprocessable_entity
+    body = JSON.parse(response.body)
+    assert_includes body.fetch("error"), "Content is too long"
+  end
+
   test "rejects blank message" do
     post api_v1_chat_public_session_messages_url(public_chat_sessions(:open_session).token), params: {
       message: { content: "" }

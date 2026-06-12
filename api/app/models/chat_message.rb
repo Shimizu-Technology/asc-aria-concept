@@ -4,7 +4,7 @@ class ChatMessage < ApplicationRecord
   belongs_to :chat_session, polymorphic: true
 
   validates :role, presence: true, inclusion: { in: ROLES }
-  validates :content, presence: true
+  validates :content, presence: true, length: { maximum: 2_000 }
   validates :occurred_at, presence: true
 
   before_validation :set_occurred_at, on: :create
