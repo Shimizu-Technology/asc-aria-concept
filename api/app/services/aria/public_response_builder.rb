@@ -147,7 +147,14 @@ module Aria
     end
 
     def plan_type_question?
-      message.match?(/\b(type|types|kind|kinds|traditional|roth|safe harbor|simple|solo|individual|403\(?b\)?|government|profit[- ]sharing)\b/i)
+      normalized_message = message.downcase
+      asks_for_plan_types = normalized_message.match?(/\b(type|types|kind|kinds|variation|variations)\b/) &&
+        normalized_message.match?(/\b(401\(?k\)?|retirement plan|retirement plans|plan|plans)\b/)
+      names_specific_plan_type = normalized_message.match?(
+        /\b(traditional 401\(?k\)?|roth 401\(?k\)?|safe harbor|simple 401\(?k\)?|solo 401\(?k\)?|individual 401\(?k\)?|403\(?b\)?|government plan|profit[- ]sharing)\b/
+      )
+
+      asks_for_plan_types || names_specific_plan_type
     end
 
     def fallback_general_sentence
