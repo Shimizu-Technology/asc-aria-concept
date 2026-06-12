@@ -2,6 +2,14 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
 
+module ActionDispatch
+  class IntegrationTest
+    setup do
+      Rack::Attack.cache.store.clear if defined?(Rack::Attack)
+    end
+  end
+end
+
 module ActiveSupport
   class TestCase
     # Run tests in parallel with specified workers

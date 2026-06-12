@@ -1,0 +1,21 @@
+open_session:
+  token: public-session-token
+  status: open
+  visitor_label: Website visitor
+  topic: General retirement education
+  detected_intent: general_education
+  handoff_required: false
+  handoff_reason:
+  metadata: {}
+  last_message_at: 2026-06-12 10:13:03
+
+handoff_session:
+  token: handoff-session-token
+  status: handoff_recommended
+  visitor_label: Website visitor
+  topic: Account-specific retirement plan support
+  detected_intent: participant_specific
+  handoff_required: true
+  handoff_reason: Asked for account-specific eligibility, balance, or borrowing details.
+  metadata: {}
+  last_message_at: 2026-06-12 10:14:03

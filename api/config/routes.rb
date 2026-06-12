@@ -6,6 +6,12 @@ Rails.application.routes.draw do
       resources :plan_rules, only: [ :index, :show ]
       resources :knowledge_entries, only: [ :index, :show ]
 
+      namespace :chat do
+        resources :public_sessions, only: [ :create, :show ], param: :id do
+          resources :messages, only: :create, controller: :public_messages
+        end
+      end
+
       namespace :admin do
         resources :audit_events, only: :index
       end

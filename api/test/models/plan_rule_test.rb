@@ -9,6 +9,19 @@ class PlanRuleTest < ActiveSupport::TestCase
     assert_includes rule.loan_summary, "5-year general repayment term"
   end
 
+  test "matching public message treats LIKE metacharacters literally" do
+    rule = PlanRule.create!(
+      employer_name: "ACME_100% Trust",
+      plan_name: "Literal% Plan",
+      plan_type: "401(k)",
+      loans_allowed: true,
+      source_label: "Test"
+    )
+
+    assert_equal rule, PlanRule.active.matching_public_message("Question about ACME_100% Trust").first
+    assert_empty PlanRule.active.matching_public_message("Question about ACMEZ100X Trust")
+  end
+
   test "loan summary explains when loans are not allowed" do
     rule = PlanRule.new(
       employer_name: "No Loan Employer",

@@ -11,6 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
+.env*
+!.env.example
+web/.env*
+!web/.env.example
 
 data/asc-scrape/
 

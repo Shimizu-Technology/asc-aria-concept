@@ -1,4 +1,4 @@
-import type { MouseEvent } from 'react'
+import type { FormEvent, MouseEvent } from 'react'
 import { useMemo, useState } from 'react'
 import './App.css'
 import { ascImageAssets, ascPages } from './ascSiteData'
@@ -18,7 +18,54 @@ type FormCategory = {
   forms: string[]
 }
 
+type PublicChatMessage = {
+  id: number
+  role: 'user' | 'assistant' | 'system' | 'staff'
+  content: string
+  metadata?: {
+    handoff_required?: boolean
+    intent?: string
+    response_mode?: string
+    ai_used?: boolean
+    model?: string
+  }
+}
+
+type PublicChatSession = {
+  token: string
+  status: string
+  detected_intent?: string | null
+  handoff_required: boolean
+  handoff_reason?: string | null
+  messages: PublicChatMessage[]
+}
+
 const asset = (name: string) => `/asc-assets/${name}`
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '')
+
+async function createPublicChatSession(): Promise<PublicChatSession> {
+  const response = await fetch(`${apiBaseUrl}/api/v1/chat/public_sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ public_chat_session: { visitor_label: 'Website visitor' } }),
+  })
+  if (!response.ok) throw new Error('Unable to start ARIA session')
+
+  const payload = await response.json()
+  return payload.public_chat_session
+}
+
+async function sendPublicChatMessage(token: string, content: string): Promise<PublicChatSession> {
+  const response = await fetch(`${apiBaseUrl}/api/v1/chat/public_sessions/${token}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: { content } }),
+  })
+  if (!response.ok) throw new Error('Unable to send ARIA message')
+
+  const payload = await response.json()
+  return payload.public_chat_session
+}
 
 const stats = [
   { value: '675+', label: 'retirement plans managed' },
@@ -370,6 +417,10 @@ function PublicSiteView({ onSecure }: { onSecure: () => void }) {
   const [selectedTask, setSelectedTask] = useState<ParticipantTask | null>(null)
   const [selectedFormCategory, setSelectedFormCategory] = useState<FormCategory>(formCategories[0])
   const [contentFilter, setContentFilter] = useState('Services')
+  const [chatSession, setChatSession] = useState<PublicChatSession | null>(null)
+  const [chatInput, setChatInput] = useState('')
+  const [isChatSending, setIsChatSending] = useState(false)
+  const [chatStatus, setChatStatus] = useState<string | null>(null)
 
   const visibleContentPages = useMemo(() => {
     if (contentFilter === 'All') return ascPages
@@ -378,6 +429,46 @@ function PublicSiteView({ onSecure }: { onSecure: () => void }) {
 
   const featuredContentPage = visibleContentPages[0] ?? ascPages[0]
   const showcasedAssets = ascImageAssets.slice(0, 48)
+  const publicChatMessages = chatSession?.messages ?? [
+    {
+      id: -1,
+      role: 'assistant' as const,
+      content: 'Buenos! I can help with forms, general 401(k) questions, and next steps. Please keep SSNs and account numbers out of public chat.',
+    },
+  ]
+
+  const submitPublicChatMessage = async (messageOverride?: string) => {
+    const content = (messageOverride ?? chatInput).trim()
+    if (!content || isChatSending) return
+
+    setIsChatSending(true)
+    setChatStatus(null)
+
+    try {
+      const session = chatSession ?? await (async () => {
+        const newSession = await createPublicChatSession()
+        setChatSession(newSession)
+        return newSession
+      })()
+      const updatedSession = await sendPublicChatMessage(session.token, content)
+      setChatSession(updatedSession)
+      setChatInput('')
+      if (updatedSession.handoff_required) {
+        setChatStatus('ARIA recommends secure support for this question.')
+      } else {
+        setChatStatus('ARIA answered using approved prototype context.')
+      }
+    } catch {
+      setChatStatus('ARIA is running in offline preview mode. Please start the Rails API to try the live prototype chat.')
+    } finally {
+      setIsChatSending(false)
+    }
+  }
+
+  const handlePublicChatSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    void submitPublicChatMessage()
+  }
 
   const handleTaskClick = (task: ParticipantTask) => {
     if (task.startsSecureHandoff) {
@@ -411,18 +502,40 @@ function PublicSiteView({ onSecure }: { onSecure: () => void }) {
               <span>ARIA support</span>
             </div>
             <h2>Answers first. Secure handoff when it becomes personal.</h2>
-            <div className="chat-window mini">
-              <p className="message aria">Buenos! I can help with forms, general 401(k) questions, and next steps.</p>
-              <p className="message user">I work for Bank of Mila. How much can I borrow from my 401(k)?</p>
-              <p className="message aria">To answer that, ASC needs to verify your identity and account information securely.</p>
+            <div className="chat-window mini" aria-live="polite">
+              {publicChatMessages.map((message) => {
+                const messageClass = message.role === 'assistant' ? 'aria' : message.role === 'system' ? 'system-note' : message.role
+
+                return (
+                  <p className={`message ${messageClass}`} key={message.id}>
+                    {message.content}
+                  </p>
+                )
+              })}
+              {isChatSending && <p className="message system-note">ARIA is checking approved prototype context.</p>}
             </div>
+            <form className="public-chat-form" onSubmit={handlePublicChatSubmit}>
+              <label className="sr-only" htmlFor="public-aria-question">Ask ARIA a public question</label>
+              <input
+                id="public-aria-question"
+                value={chatInput}
+                onChange={(event) => setChatInput(event.target.value)}
+                placeholder="Ask about 401(k) loans or forms"
+                disabled={isChatSending}
+                maxLength={2000}
+              />
+              <button className="secure-button" type="submit" disabled={isChatSending || chatInput.trim().length === 0}>
+                Ask ARIA
+              </button>
+            </form>
             <div className="handoff-actions">
+              <button className="ghost-button" onClick={() => { setShowGeneralInfo(true); void submitPublicChatMessage('What is a 401(k) loan?') }}>General info only</button>
+              <button className="ghost-button" onClick={() => { setShowGeneralInfo(true); void submitPublicChatMessage('I work for Bank of Mila. How much can I borrow from my 401(k)?') }}>Try secure handoff</button>
               <button className="secure-button" onClick={onSecure}>Continue securely</button>
-              <button className="ghost-button" onClick={() => setShowGeneralInfo(true)}>General info only</button>
             </div>
-            {showGeneralInfo && (
+            {(showGeneralInfo || chatStatus) && (
               <div className="inline-info-card" role="status">
-                <strong>General 401(k) loan education stays public.</strong>
+                <strong>{chatStatus ?? 'General 401(k) loan education stays public.'}</strong>
                 <span>Personal eligibility, balances, and active loan counts move to secure support.</span>
               </div>
             )}

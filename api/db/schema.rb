@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_12_001307) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_12_050002) do
   create_table "audit_events", force: :cascade do |t|
     t.string "action", null: false
     t.integer "actor_id"
@@ -24,6 +24,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_12_001307) do
     t.index ["actor_id"], name: "index_audit_events_on_actor_id"
     t.index ["auditable_type", "auditable_id"], name: "index_audit_events_on_auditable_type_and_auditable_id"
     t.index ["occurred_at"], name: "index_audit_events_on_occurred_at"
+  end
+
+  create_table "chat_messages", force: :cascade do |t|
+    t.integer "chat_session_id", null: false
+    t.string "chat_session_type", null: false
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.json "metadata", default: {}, null: false
+    t.datetime "occurred_at", null: false
+    t.string "role", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_session_type", "chat_session_id"], name: "index_chat_messages_on_chat_session_type_and_chat_session_id"
+    t.index ["occurred_at"], name: "index_chat_messages_on_occurred_at"
+    t.index ["role"], name: "index_chat_messages_on_role"
   end
 
   create_table "knowledge_entries", force: :cascade do |t|
@@ -73,6 +87,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_12_001307) do
     t.index ["employer_name"], name: "index_plan_rules_on_employer_name"
     t.index ["plan_name"], name: "index_plan_rules_on_plan_name"
     t.index ["plan_type"], name: "index_plan_rules_on_plan_type"
+  end
+
+  create_table "public_chat_sessions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "detected_intent"
+    t.string "handoff_reason"
+    t.boolean "handoff_required", default: false, null: false
+    t.datetime "last_message_at"
+    t.json "metadata", default: {}, null: false
+    t.string "status", default: "open", null: false
+    t.string "token", null: false
+    t.string "topic"
+    t.datetime "updated_at", null: false
+    t.string "visitor_label"
+    t.index ["detected_intent"], name: "index_public_chat_sessions_on_detected_intent"
+    t.index ["handoff_required"], name: "index_public_chat_sessions_on_handoff_required"
+    t.index ["last_message_at"], name: "index_public_chat_sessions_on_last_message_at"
+    t.index ["status"], name: "index_public_chat_sessions_on_status"
+    t.index ["token"], name: "index_public_chat_sessions_on_token", unique: true
   end
 
   create_table "roles", force: :cascade do |t|

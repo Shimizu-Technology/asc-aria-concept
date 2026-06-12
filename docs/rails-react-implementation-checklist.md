@@ -1,6 +1,6 @@
 # ASC + ARIA Rails/React implementation checklist
 
-**Status:** Phase 1–2 foundation branch in progress
+**Status:** Rails-backed public ARIA chat implemented; secure handoff/staff/form workflows remain
 **Last updated:** 2026-06-11
 **Primary plan:** `docs/rails-backed-prototype-plan.md`
 
@@ -62,7 +62,7 @@ For prototype, roles can be seeded/mock-authenticated.
 - [x] General 401(k) loan explanation
 - [x] Loan vs withdrawal explanation
 - [x] Repayment term caveat
-- [ ] Leaving employment caveat
+- [x] Leaving employment caveat
 - [x] Educational/no tax/legal/investment advice disclaimer
 - [x] Secure support escalation language
 
@@ -78,9 +78,9 @@ For prototype, roles can be seeded/mock-authenticated.
 
 ### Chat / ARIA
 
-- [ ] `PublicChatSession`
+- [x] `PublicChatSession`
 - [ ] `SecureChatSession`
-- [ ] `ChatMessage`
+- [x] `ChatMessage`
 - [ ] `HandoffToken`
 - [ ] `SupportRequest`
 - [ ] `StaffReview`
@@ -117,9 +117,9 @@ Attachment model can wait unless we decide to demo upload placeholders:
 
 ### Public ARIA chat
 
-- [ ] `POST /api/v1/chat/public_sessions`
-- [ ] `GET /api/v1/chat/public_sessions/:id`
-- [ ] `POST /api/v1/chat/public_sessions/:id/messages`
+- [x] `POST /api/v1/chat/public_sessions`
+- [x] `GET /api/v1/chat/public_sessions/:token`
+- [x] `POST /api/v1/chat/public_sessions/:token/messages`
 
 ### Secure handoff / secure chat
 
@@ -161,9 +161,9 @@ Attachment model can wait unless we decide to demo upload placeholders:
 ### Public website / ARIA
 
 - [ ] Existing ASC homepage stays polished.
-- [ ] Public ARIA chat panel calls Rails API.
-- [ ] General question returns seeded educational answer.
-- [ ] Account-specific question triggers secure handoff CTA.
+- [x] Public ARIA chat panel calls Rails API.
+- [x] General question returns seeded educational answer.
+- [x] Account-specific question triggers secure handoff CTA.
 
 ### Secure support
 
@@ -216,29 +216,31 @@ Attachment model can wait unless we decide to demo upload placeholders:
 
 Classify messages as:
 
-- [ ] `general_education`
-- [ ] `form_routing`
-- [ ] `plan_specific`
-- [ ] `participant_specific`
-- [ ] `high_risk_escalation`
+- [x] `general_education`
+- [x] `form_routing`
+- [x] `plan_specific`
+- [x] `participant_specific`
+- [x] `high_risk_escalation`
 
 ### Response strategy
 
-- [ ] General education: answer from seeded knowledge.
-- [ ] Form routing: point to embedded form or forms section.
-- [ ] Plan-specific: use seeded fake `PlanRule` with caveats.
-- [ ] Participant-specific: create secure handoff / staff review.
-- [ ] High-risk: route to staff and avoid advice.
+- [x] General education: answer from seeded knowledge, with optional OpenRouter grounded in seeded context.
+- [x] Form routing: point to forms section and secure support for sensitive details.
+- [x] Plan-specific: use seeded fake `PlanRule` with caveats.
+- [ ] Participant-specific: create secure handoff / staff review. Current PR returns secure handoff CTA only.
+- [x] High-risk: route to staff and avoid advice.
 
-### No live LLM in first implementation unless explicitly approved
+### OpenRouter/LLM boundary
 
-- [ ] Start with template responses.
-- [ ] Add OpenRouter/LLM only after the safe Rails workflow is working.
+- [x] Start with template fallback responses.
+- [x] Add optional OpenRouter through Rails only, defaulting to `google/gemini-2.5-flash` via `OPENROUTER_MODEL`.
+- [x] Do not call OpenRouter for participant-specific or high-risk handoff responses.
+- [ ] Add eval set before using live AI in any ASC-facing pilot.
 
 ## Audit events to create
 
-- [ ] public chat session created
-- [ ] public message received
+- [x] public chat session created
+- [x] public message received
 - [ ] secure handoff created
 - [ ] demo verification completed
 - [ ] secure session created

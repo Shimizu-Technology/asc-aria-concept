@@ -119,6 +119,12 @@ knowledge_entries = [
     source_label: "Seeded ASC educational prototype content"
   },
   {
+    category: "401k_loans",
+    title: "Leaving employment caveat",
+    content: "Leaving employment can change available retirement-plan options and may affect loan, distribution, or rollover paths. Participants should confirm their employment status and plan rules with ASC before acting.",
+    source_label: "Seeded ASC educational prototype content"
+  },
+  {
     category: "secure_support",
     title: "Account-specific escalation",
     content: "When a participant asks about personal balance, eligibility, loan amount, or active loan count, ARIA should move the conversation to secure support so ASC can verify identity and account details.",

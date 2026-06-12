@@ -23,7 +23,7 @@ See:
 - Imported public ASC content index covering 45 public pages/posts, with source links and a staged 131-image public asset library for private review
 - ASC-style responsive header with Account Login, Open Account, Contact Us, Request Proposal, public navigation, and discreet demo controls
 - Participant support hub task cards
-- Public ARIA assistant concept with account-specific secure handoff
+- Rails-backed public ARIA assistant with controlled responses, seeded knowledge/plan-rule context, optional OpenRouter, and account-specific secure handoff CTA
 - Fake authenticated secure support page
 - Saved-session participant chat mockup
 - Staff/call-center dashboard queue
@@ -31,14 +31,14 @@ See:
 - AI draft, staff approve/send, edit, and human-takeover controls
 - Admin/audit preview with governance and traceability metrics
 - Documented future phase for replacing external Jotform/PDF intake with secure in-app forms and staff submission dashboards
-- Rails API foundation under `api/` with fake users/roles, fake Airtable-style plan rules, seeded ARIA knowledge entries, and audit-event support
+- Rails API foundation under `api/` with fake users/roles, fake Airtable-style plan rules, seeded ARIA knowledge entries, public chat sessions/messages, and audit-event support
 
 ## Important boundaries
 
 - Public ASC website copy/images/logos are included for private stakeholder concept review only; production usage should be approved by ASC and replaced with official source assets where possible
 - No real participant data
 - No real authentication
-- No real AI calls
+- No live AI required; OpenRouter is optional and falls back to deterministic/template responses when unset
 - No Relias, Airtable, Jotform replacement, secure form storage, or ASC integration
 - Demo/sample workflow only
 
@@ -59,6 +59,8 @@ Frontend:
 
 ```bash
 npm install
+# Optional when Rails API is not on http://127.0.0.1:3000
+# echo "VITE_API_BASE_URL=http://127.0.0.1:3000" > web/.env.local
 npm run dev -- --host 127.0.0.1
 ```
 
@@ -77,13 +79,23 @@ bin/rails db:prepare
 bin/rails server -p 3000
 ```
 
+Optional OpenRouter-backed public ARIA responses:
+
+```bash
+# api/.env or shell environment
+OPENROUTER_API_KEY=...
+OPENROUTER_MODEL=google/gemini-2.5-flash
+```
+
+The model is configurable via `OPENROUTER_MODEL`. If no OpenRouter key is present, public ARIA uses deterministic/template fallback responses. Anonymous public chat write endpoints are rate-limited with Rack::Attack (`PUBLIC_CHAT_SESSION_RATE_LIMIT`, `PUBLIC_CHAT_MESSAGE_RATE_LIMIT`, and `PUBLIC_CHAT_RATE_PERIOD_SECONDS`).
+
 API health check:
 
 ```text
 http://127.0.0.1:3000/api/v1/health
 ```
 
-Admin API endpoints require `ASC_ARIA_ADMIN_API_TOKEN` and an `Authorization: Bearer <token>` or `X-ASC-ARIA-ADMIN-TOKEN` header. Public bootstrap data intentionally excludes fake user email/phone/external identifier details.
+Admin API endpoints require `ASC_ARIA_ADMIN_API_TOKEN` and an `Authorization: Bearer <token>` or `X-ASC-ARIA-ADMIN-TOKEN` header. Public bootstrap data intentionally excludes fake user email/phone/external identifier details. The public ARIA chat endpoints are intentionally public but only use fake/sample seeded context and route account-specific questions to secure support.
 
 ## Verify
 
