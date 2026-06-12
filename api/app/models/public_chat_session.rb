@@ -2,9 +2,11 @@ class PublicChatSession < ApplicationRecord
   has_many :chat_messages, as: :chat_session, dependent: :destroy
 
   STATUSES = %w[open handoff_recommended closed].freeze
+  VISITOR_LABEL_MAX_LENGTH = 120
 
   validates :token, presence: true, uniqueness: true
   validates :status, presence: true, inclusion: { in: STATUSES }
+  validates :visitor_label, length: { maximum: VISITOR_LABEL_MAX_LENGTH }
 
   before_validation :set_token, on: :create
 

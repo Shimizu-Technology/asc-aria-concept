@@ -522,7 +522,7 @@ function PublicSiteView({ onSecure }: { onSecure: () => void }) {
                 onChange={(event) => setChatInput(event.target.value)}
                 placeholder="Ask about 401(k) loans or forms"
                 disabled={isChatSending}
-                maxLength={1000}
+                maxLength={2000}
               />
               <button className="secure-button" type="submit" disabled={isChatSending || chatInput.trim().length === 0}>
                 Ask ARIA

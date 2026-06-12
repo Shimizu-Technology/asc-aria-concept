@@ -17,6 +17,16 @@ class Api::V1::Chat::PublicSessionsControllerTest < ActionDispatch::IntegrationT
     assert_includes session.fetch("messages").first.fetch("content"), "Please do not enter SSNs"
   end
 
+  test "rejects overlong visitor label" do
+    post api_v1_chat_public_sessions_url, params: {
+      public_chat_session: { visitor_label: "a" * 121 }
+    }
+
+    assert_response :unprocessable_entity
+    body = JSON.parse(response.body)
+    assert_includes body.fetch("error"), "Visitor label is too long"
+  end
+
   test "creates public chat session without optional params" do
     post api_v1_chat_public_sessions_url
 

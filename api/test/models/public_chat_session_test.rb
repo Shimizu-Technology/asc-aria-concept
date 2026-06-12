@@ -8,6 +8,13 @@ class PublicChatSessionTest < ActiveSupport::TestCase
     assert_equal "open", session.status
   end
 
+  test "limits visitor label length" do
+    session = PublicChatSession.new(visitor_label: "a" * 121)
+
+    assert_not session.valid?
+    assert_includes session.errors[:visitor_label], "is too long (maximum is 120 characters)"
+  end
+
   test "serializes messages chronologically" do
     session = public_chat_sessions(:open_session)
     payload = session.as_api_json

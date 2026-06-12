@@ -18,6 +18,8 @@ module Api
           record_session_created_audit_safely(session)
 
           render json: { public_chat_session: session.as_api_json }, status: :created
+        rescue ActiveRecord::RecordInvalid => e
+          render json: { error: e.record.errors.full_messages.to_sentence }, status: :unprocessable_entity
         end
 
         def show
