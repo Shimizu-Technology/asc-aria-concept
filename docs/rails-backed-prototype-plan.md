@@ -289,8 +289,9 @@ Acceptance criteria:
 
 - Rails tests pass.
 - API health endpoint works.
-- Seeded users/roles can be loaded.
+- Seeded users/roles can be loaded through Rails seeds/tests without exposing the user roster on public bootstrap.
 - Audit events can be created from service actions.
+- Admin audit endpoints require a prototype admin token until real auth/roles are implemented.
 
 ### Phase 2: ARIA chat + secure handoff
 

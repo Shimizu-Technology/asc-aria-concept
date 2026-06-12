@@ -6,7 +6,12 @@ class Api::V1::KnowledgeEntriesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 2, body.fetch("knowledge_entries").length
+    entries = body.fetch("knowledge_entries")
+    titles = entries.map { |entry| entry.fetch("title") }
+
+    assert_includes titles, "401(k) loan basics"
+    assert_includes titles, "Account-specific escalation"
+    assert entries.all? { |entry| entry.fetch("active") }
   end
 
   test "filters knowledge entries by category" do
@@ -15,7 +20,10 @@ class Api::V1::KnowledgeEntriesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     body = JSON.parse(response.body)
     entries = body.fetch("knowledge_entries")
-    assert_equal 1, entries.length
-    assert_equal "Account-specific escalation", entries.first.fetch("title")
+    titles = entries.map { |entry| entry.fetch("title") }
+
+    assert entries.present?
+    assert entries.all? { |entry| entry.fetch("category") == "secure_support" }
+    assert_includes titles, "Account-specific escalation"
   end
 end

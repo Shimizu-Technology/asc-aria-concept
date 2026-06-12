@@ -4,7 +4,6 @@ module Api
       def show
         render json: {
           roles: Role.order(:name).map(&:as_api_json),
-          users: User.includes(:role, :participant_profile, :staff_profile).order(:name).map(&:as_api_json),
           plan_rules: PlanRule.active.order(:employer_name, :plan_name).map(&:as_api_json),
           knowledge_entries: KnowledgeEntry.active.order(:category, :title).map(&:as_api_json)
         }

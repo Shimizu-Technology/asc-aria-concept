@@ -6,7 +6,12 @@ class Api::V1::PlanRulesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 2, body.fetch("plan_rules").length
+    rules = body.fetch("plan_rules")
+    plan_names = rules.map { |rule| rule.fetch("plan_name") }
+
+    assert_includes plan_names, "Bank of Mila 401(k)"
+    assert_includes plan_names, "Guam Demo Employer 401(k)"
+    assert rules.all? { |rule| rule.fetch("active") }
   end
 
   test "filters active plan rules by employer" do
@@ -15,7 +20,10 @@ class Api::V1::PlanRulesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     body = JSON.parse(response.body)
     rules = body.fetch("plan_rules")
-    assert_equal 1, rules.length
-    assert_equal "Bank of Mila 401(k)", rules.first.fetch("plan_name")
+    plan_names = rules.map { |rule| rule.fetch("plan_name") }
+
+    assert rules.present?
+    assert rules.all? { |rule| rule.fetch("employer_name") == "Bank of Mila" }
+    assert_includes plan_names, "Bank of Mila 401(k)"
   end
 end

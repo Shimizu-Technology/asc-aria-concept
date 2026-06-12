@@ -109,7 +109,7 @@ Attachment model can wait unless we decide to demo upload placeholders:
 ### Health / bootstrap / seeded data
 
 - [x] `GET /api/v1/health`
-- [x] `GET /api/v1/bootstrap` optional seeded UI data
+- [x] `GET /api/v1/bootstrap` optional public seeded UI data, excluding user roster/contact identifiers
 - [x] `GET /api/v1/plan_rules`
 - [x] `GET /api/v1/plan_rules/:id`
 - [x] `GET /api/v1/knowledge_entries`
@@ -153,7 +153,7 @@ Attachment model can wait unless we decide to demo upload placeholders:
 
 ### Admin / audit
 
-- [x] `GET /api/v1/admin/audit_events`
+- [x] `GET /api/v1/admin/audit_events` with prototype admin token guard
 - [ ] `GET /api/v1/admin/dashboard`
 
 ## Frontend screens

@@ -83,6 +83,8 @@ API health check:
 http://127.0.0.1:3000/api/v1/health
 ```
 
+Admin API endpoints require `ASC_ARIA_ADMIN_API_TOKEN` and an `Authorization: Bearer <token>` or `X-ASC-ARIA-ADMIN-TOKEN` header. Public bootstrap data intentionally excludes fake user email/phone/external identifier details.
+
 ## Verify
 
 ```bash
@@ -93,6 +95,9 @@ node web/scripts/mobile-check.mjs
 
 cd api
 bin/rails test
+bin/rubocop
+bin/brakeman -q
+bin/bundler-audit check
 ```
 
 The check scripts use local Chrome/Chromium via `puppeteer-core` to verify mobile/desktop viewport dimensions and capture screenshots in `/tmp`. Set `CHECK_URL` if the dev server is running on a non-default port. Set `CHROME_PATH` or `PUPPETEER_EXECUTABLE_PATH` if Chrome/Chromium is not installed in a standard macOS, Linux, or Windows location.

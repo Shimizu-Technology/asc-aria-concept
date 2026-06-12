@@ -23,14 +23,23 @@ Health check:
 GET /api/v1/health
 ```
 
-Seeded-data endpoints:
+Public seeded-data endpoints:
 
 ```text
 GET /api/v1/bootstrap
 GET /api/v1/plan_rules
 GET /api/v1/knowledge_entries
+```
+
+Admin endpoints require an `ASC_ARIA_ADMIN_API_TOKEN` environment variable and either an `Authorization: Bearer <token>` header or an `X-ASC-ARIA-ADMIN-TOKEN` header:
+
+```text
 GET /api/v1/admin/audit_events
 ```
+
+`/api/v1/bootstrap` intentionally excludes the fake user roster so unauthenticated callers do not receive emails, phone numbers, or external identifiers.
+
+CORS is limited to current public read-only endpoints. Future write routes should add explicit CORS rules only after their authentication/authorization boundary is defined.
 
 ## Verify
 
