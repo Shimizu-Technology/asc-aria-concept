@@ -2,9 +2,9 @@
 
 > **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task once Leon approves build start.
 
-**Goal:** Turn the current ASC + ARIA concept into a production-shaped prototype that demonstrates public ARIA, secure authenticated handoff, staff review, Relias-bridge workflow, and admin/audit oversight using fake/sample data.
+**Goal:** Turn the current ASC + ARIA concept into an actual Rails + React prototype app that demonstrates public ARIA, simple secure handoff, staff review, fake Relias-bridge workflow, embedded secure form intake, admin submission queues, staff responses, and audit oversight using fake/sample data.
 
-**Architecture:** Keep the current public React/Vite prototype as the visual base. Add a secure-support workflow and staff/admin dashboard screens in React first. Add Rails API only when persistence, role-based staff workflows, audit events, and realistic data modeling become necessary for the paid pilot / stronger POC.
+**Architecture:** Keep the current React/Vite public concept as the visual base. Add a Rails API backend so the prototype has real persistence, staff workflows, form submissions, status changes, notes/responses, and audit events.
 
 **Tech Stack:** React + Vite + TypeScript frontend, Rails API backend, Neon/Postgres, Airtable sync later, Rails-orchestrated RAG later, Netlify frontend, Render backend.
 
@@ -14,11 +14,15 @@
 
 Already done:
 
-- React/Vite ASC + ARIA concept exists.
+- React/Vite ASC + ARIA modernization concept exists.
 - Public GitHub repo exists: `https://github.com/Shimizu-Technology/asc-aria`
 - Public ASC content/numbers documented in `docs/asc-public-content.md`.
+- Public sitemap/content and asset boundary documented in `docs/content-and-assets.md`.
 - Long-term architecture/RAG direction documented in `docs/architecture-and-rag-plan.md`.
 - Secure handoff/staff workflow documented in `docs/secure-support-workflow.md`.
+- Rails-backed prototype direction documented in `docs/rails-backed-prototype-plan.md`.
+- Frontend moved into `web/` and Rails API foundation added under `api/`.
+- Fake users/roles, fake Airtable-style plan rules, controlled ARIA knowledge entries, and audit-event API support added for the first foundation PR.
 
 ## Strategic build decision
 
@@ -26,10 +30,11 @@ Do not jump directly into a full production backend unless the goal is a paid pi
 
 Recommended next build sequence:
 
-1. **Frontend product prototype** — fastest way to show the right workflow to ASC stakeholders.
-2. **Rails API vertical slice** — once we want persistence, roles, queues, audit events, and realistic backend architecture.
-3. **Airtable/RAG integration** — once ASC provides sample Airtable schema/export or approves use of real/sanitized data.
-4. **Security/auth hardening** — once ASC requirements and identity-provider path are known.
+1. **Frontend product prototype** — completed enough for stakeholder review; proves the website + ARIA direction.
+2. **Rails + React prototype app** — decided next step; adds persistence, queues, audit events, controlled chatbot behavior, and fake-data form intake.
+3. **Secure form intake expansion** — replace Jotform/PDF intake in concept with app-owned enrollment/request forms and staff submission queues.
+4. **Airtable/RAG integration** — once ASC provides sample Airtable schema/export or approves use of real/sanitized data.
+5. **Security/auth hardening** — once ASC requirements and identity-provider path are known.
 
 ## What we need before building the real backend
 
@@ -43,26 +48,32 @@ From ASC stakeholders:
 - whether ASC has existing login/SSO/participant portal expectations
 - preferred disclaimer/compliance language
 - whether chats can be saved and retention expectations
+- whether ASC wants to replace Jotform/external form intake with secure in-app forms
+- what enrollment/request forms collect sensitive information such as SSN, DOB, signatures, beneficiaries, or attachments
+- who reviews form submissions and what statuses/workflows they use today
 - whether this is just a demo, internal pilot, or external participant pilot
 
 From Leon/Shimizu Technology:
 
-- decide whether next artifact is a polished frontend demo or a Rails-backed pilot
-- decide if repo should be reorganized into `web/` + `api/` now or after frontend flow is complete
+- confirm the next artifact is the Rails-backed prototype vertical slice
+- repo reorganization into `web/` + `api/` is complete in the foundation branch
 - decide whether to use Clerk demo auth, mock auth, or Rails auth for the next stage
 - decide proposal tier/scope before connecting real systems
 
 ## Recommended immediate next step
 
-Build a **frontend-only workflow prototype** of the secure handoff + staff dashboard before adding Rails.
+Build the **Rails + React prototype app** using fake/sample data.
 
 Reason:
 
-- ASC stakeholders need to react to the product workflow first.
-- No real participant data is available yet.
-- Relias integration is not available.
-- Airtable schema/data is not available yet.
-- A polished workflow demo can make the Tier 3 scope feel concrete without overbuilding.
+- The frontend concept now demonstrates the website + ARIA direction.
+- The next useful proof is operational: persisted sessions, staff queues, form submissions, status changes, notes, and audit history.
+- No real participant data is available yet, so the backend should start with seeded fake data.
+- Relias integration is not available and should remain manual/fake in the prototype.
+- Airtable schema/data is not available yet, so plan rules can start as fixtures/seeds.
+- A Rails-backed prototype makes the pitch stronger by showing ASC a real support-operations platform, not just a screen mockup.
+
+See `docs/rails-backed-prototype-plan.md` for the implementation plan and `docs/rails-react-implementation-checklist.md` for the task checklist.
 
 ## Frontend prototype acceptance criteria
 
@@ -94,12 +105,12 @@ No real auth, real AI, real Airtable, real Relias, or real participant data shou
 
 **Files:**
 
-- Modify: `src/App.tsx`
-- Modify/create supporting components under `src/` if the current single-file app becomes hard to maintain
+- Modify: `web/src/App.tsx`
+- Modify/create supporting components under `web/src/` if the current single-file app becomes hard to maintain
 
 **Steps:**
 
-1. Inspect current `src/App.tsx` structure.
+1. Inspect current `web/src/App.tsx` structure.
 2. Add lightweight view state such as:
    - `home`
    - `public-chat`
@@ -117,8 +128,8 @@ No real auth, real AI, real Airtable, real Relias, or real participant data shou
 
 ```bash
 npm run build
-node scripts/desktop-check.mjs
-node scripts/mobile-check.mjs
+node web/scripts/desktop-check.mjs
+node web/scripts/mobile-check.mjs
 ```
 
 ## Task 2: Public ARIA account-specific handoff
@@ -127,7 +138,7 @@ node scripts/mobile-check.mjs
 
 **Files:**
 
-- Modify: `src/App.tsx` or new chat component files
+- Modify: `web/src/App.tsx` or new chat component files
 
 **Steps:**
 
@@ -147,7 +158,7 @@ node scripts/mobile-check.mjs
 
 **Files:**
 
-- Modify: `src/App.tsx` or create `SecureAuthView.tsx`
+- Modify: `web/src/App.tsx` or create `SecureAuthView.tsx`
 
 **Steps:**
 
@@ -169,7 +180,7 @@ node scripts/mobile-check.mjs
 
 **Files:**
 
-- Modify: `src/App.tsx` or create `SecureChatView.tsx`
+- Modify: `web/src/App.tsx` or create `SecureChatView.tsx`
 
 **Steps:**
 
@@ -190,7 +201,7 @@ node scripts/mobile-check.mjs
 
 **Files:**
 
-- Modify: `src/App.tsx` or create `StaffDashboardView.tsx`
+- Modify: `web/src/App.tsx` or create `StaffDashboardView.tsx`
 
 **Steps:**
 
@@ -216,7 +227,7 @@ node scripts/mobile-check.mjs
 
 **Files:**
 
-- Modify: `src/App.tsx` or create `StaffSessionView.tsx`
+- Modify: `web/src/App.tsx` or create `StaffSessionView.tsx`
 
 **Steps:**
 
@@ -245,7 +256,7 @@ node scripts/mobile-check.mjs
 
 **Files:**
 
-- Modify: `src/App.tsx` or create `AdminDashboardView.tsx`
+- Modify: `web/src/App.tsx` or create `AdminDashboardView.tsx`
 
 **Steps:**
 
@@ -297,7 +308,7 @@ node scripts/mobile-check.mjs
 
 # Phase 2: Rails API vertical slice
 
-Start this only after the frontend flow is approved or Leon decides the next artifact should be backend-backed.
+This is now the recommended next build stage if Leon wants to move beyond the visual concept.
 
 ## Backend slice goals
 
@@ -332,6 +343,15 @@ AuditEvent
 PlanRule
 KnowledgeEntry
 KnowledgeChunk
+FormDefinition
+FormFieldDefinition
+FormSubmission
+FormSubmissionFieldValue
+FormSubmissionAttachment
+FormSubmissionStatusEvent
+FormSubmissionAssignment
+FormSubmissionNote
+FormSubmissionExport
 ```
 
 ## Initial API routes
@@ -347,6 +367,15 @@ POST /api/v1/staff/sessions/:id/verified_facts
 POST /api/v1/staff/sessions/:id/drafts
 POST /api/v1/staff/sessions/:id/approve
 GET  /api/v1/admin/audit_events
+GET  /api/v1/forms
+GET  /api/v1/forms/:id
+POST /api/v1/form_submissions
+GET  /api/v1/staff/form_submissions
+GET  /api/v1/staff/form_submissions/:id
+POST /api/v1/staff/form_submissions/:id/status
+POST /api/v1/staff/form_submissions/:id/assign
+POST /api/v1/staff/form_submissions/:id/notes
+POST /api/v1/staff/form_submissions/:id/exports
 ```
 
 ## Backend verification
@@ -375,6 +404,75 @@ Smoke test:
 - draft generated
 - approve response
 - audit events created
+- submit sample form intake with fake data
+- staff reviews form submission, changes status, adds note, and creates export event
+
+---
+
+# Phase 2b: Secure form intake + admin submissions
+
+Start this after ASC confirms that replacing external Jotform/PDF intake is part of the pilot or paid build scope.
+
+## Why it matters
+
+ASC currently has at least one participant enrollment flow hosted outside the ASC site, such as:
+
+```text
+Retirement Plan Enrollment Form
+https://form.jotform.com/250117028657859
+```
+
+This is a strong modernization opportunity because forms are not just content. They are operational workflows that can feed staff queues, audit logs, follow-up tasks, and eventually integrations.
+
+## Goals
+
+- replace external Jotform-style flows with secure ASC-owned forms
+- keep participants inside the ASC website/app experience
+- support plan-aware field routing and validation
+- store submissions securely in Rails/Postgres
+- show submissions in a staff/admin dashboard
+- let staff assign, review, request more info, export, and complete submissions
+- maintain audit history for views, status changes, notes, exports, and downloads
+
+## Form intake boundaries
+
+Do not handle real enrollment data until ASC approves the security model.
+
+Required before real data:
+
+- authentication or strong verification strategy
+- encryption at rest for sensitive fields
+- role-based access control
+- audit logs for every staff/admin action
+- file upload and attachment policy
+- data retention/deletion policy
+- PII-safe notification rules
+- approved legal/disclaimer language
+
+## Candidate forms
+
+- retirement plan enrollment
+- beneficiary update
+- distribution/loan request intake or precheck
+- participant contact information update
+- employer/request-proposal intake
+- document upload for staff review, if approved
+
+## Acceptance criteria for a safe prototype
+
+Frontend-only or fake-data backend demo can show:
+
+- plan/form chooser
+- dynamic form sections
+- fake submission confirmation
+- staff submission queue
+- submission detail page
+- status workflow: New → In Review → Needs More Info → Completed
+- internal staff notes
+- export/download placeholder
+- audit event list
+
+It must not collect or store real SSNs, DOBs, signatures, beneficiary data, or real documents until ASC approves the production security scope.
 
 ---
 
@@ -409,10 +507,12 @@ Before any real participant data:
 
 ## Final near-term recommendation
 
-Build Phase 1 first.
+The frontend concept has answered the first stakeholder question: the website + ARIA workflow direction is compelling.
 
-It will answer the most important stakeholder question:
+Build the Rails + React prototype app next.
 
-> Does this secure handoff + staff-reviewed ARIA workflow make sense operationally for ASC?
+It should answer the next operational question:
 
-Once ASC stakeholders react positively, graduate to the Rails-backed vertical slice and formalize the pilot scope.
+> Can ASC manage ARIA support sessions, secure form submissions, staff review, notes, statuses, and audit history from one coherent platform?
+
+Keep the prototype fake-data only until ASC approves the security/compliance scope for real participant data.

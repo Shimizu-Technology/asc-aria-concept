@@ -14,6 +14,23 @@ dist-ssr
 
 data/asc-scrape/
 
+# Rails API local/secrets
+api/config/master.key
+api/config/credentials/*.key
+api/.kamal/secrets
+api/.bundle/
+api/.env*
+!api/.env.example
+api/log/*.log
+api/tmp/**
+!api/tmp/.keep
+!api/tmp/pids/
+!api/tmp/pids/.keep
+!api/tmp/storage/
+!api/tmp/storage/.keep
+api/storage/*.sqlite3
+api/storage/*.sqlite3-*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

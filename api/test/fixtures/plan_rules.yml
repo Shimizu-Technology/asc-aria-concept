@@ -1,0 +1,27 @@
+bank_of_mila:
+  employer_name: Bank of Mila
+  plan_name: Bank of Mila 401(k)
+  plan_type: 401(k)
+  loans_allowed: true
+  max_active_loans: 1
+  max_repayment_years: 5
+  hardship_allowed: true
+  distribution_notes: Final eligibility depends on account status, plan documents, and ASC staff verification.
+  source_label: Seeded fake Airtable-style plan rule
+  source_url:
+  active: true
+  effective_on: 2026-01-01
+
+guam_demo:
+  employer_name: Guam Demo Employer
+  plan_name: Guam Demo Employer 401(k)
+  plan_type: 401(k)
+  loans_allowed: true
+  max_active_loans: 2
+  max_repayment_years: 5
+  hardship_allowed: true
+  distribution_notes: Participant must remain subject to plan and IRS limits.
+  source_label: Seeded fake Airtable-style plan rule
+  source_url:
+  active: true
+  effective_on: 2026-01-01

@@ -1,0 +1,17 @@
+participant_user:
+  name: Malia Santos
+  email: malia.santos@example.test
+  role: participant
+  status: active
+
+staff_user:
+  name: ASC Staff Demo
+  email: staff@example.test
+  role: staff
+  status: active
+
+supervisor_user:
+  name: ASC Supervisor Demo
+  email: supervisor@example.test
+  role: supervisor
+  status: active

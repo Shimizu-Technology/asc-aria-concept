@@ -1,0 +1,15 @@
+loan_basics:
+  title: 401(k) loan basics
+  category: 401k_loans
+  content: A 401(k) loan lets a participant borrow from eligible vested retirement funds when the plan allows loans.
+  source_label: Seeded ASC educational prototype content
+  source_url:
+  active: true
+
+secure_escalation:
+  title: Account-specific escalation
+  category: secure_support
+  content: Account-specific questions should move to secure support for ASC staff verification.
+  source_label: Seeded ASC support policy prototype content
+  source_url:
+  active: true

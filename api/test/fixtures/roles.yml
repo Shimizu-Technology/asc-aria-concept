@@ -1,0 +1,11 @@
+participant:
+  name: participant
+  description: Fake participant role
+
+staff:
+  name: staff
+  description: Fake staff role
+
+supervisor:
+  name: supervisor
+  description: Fake supervisor role

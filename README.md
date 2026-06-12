@@ -4,15 +4,17 @@ Digital support prototype for the ASC Trust / ARIA opportunity.
 
 ## Purpose
 
-This is a lightweight React/Vite concept, not production code. It is intended for stakeholder review and uses public ASC Trust content plus fake/sample participant workflow data to show how a modern ASC website, participant support hub, public ARIA assistant, and secure supervised support flow could fit together.
+This is a private React/Vite + Rails prototype direction, not production code. It is intended for stakeholder review and uses public ASC Trust content plus fake/sample workflow data to show how a modern ASC website, participant support hub, public ARIA assistant, secure supervised support flow, and future form intake platform could fit together.
 
 See:
 
 - `docs/content-and-assets.md` for the public ASC Trust pages/assets reviewed, what was included locally, and the asset-approval boundary.
 - `docs/asc-public-content.md` for the public ASC Trust pages/content checked and the demo-data boundary.
 - `docs/architecture-and-rag-plan.md` for the recommended long-term React + Rails + Airtable/RAG architecture.
-- `docs/secure-support-workflow.md` for the public-to-authenticated ARIA handoff, staff dashboard, Relias bridge, and admin/audit model.
+- `docs/secure-support-workflow.md` for the public-to-authenticated ARIA handoff, staff dashboard, Relias bridge, secure form intake opportunity, and admin/audit model.
 - `docs/build-readiness-plan.md` for the recommended phased build sequence and acceptance criteria.
+- `docs/rails-backed-prototype-plan.md` for the decided next build direction: a Rails + React prototype app with ARIA chat, simple secure handoff, secure form intake, and admin dashboards.
+- `docs/rails-react-implementation-checklist.md` for the pre-build model/route/screen checklist and acceptance criteria.
 - `docs/demo-script.md` for the recommended 3–5 minute stakeholder walkthrough.
 
 ## Current prototype includes
@@ -28,17 +30,32 @@ See:
 - Staff session detail with fake Relias bridge fields
 - AI draft, staff approve/send, edit, and human-takeover controls
 - Admin/audit preview with governance and traceability metrics
+- Documented future phase for replacing external Jotform/PDF intake with secure in-app forms and staff submission dashboards
+- Rails API foundation under `api/` with fake users/roles, fake Airtable-style plan rules, seeded ARIA knowledge entries, and audit-event support
 
 ## Important boundaries
 
 - Public ASC website copy/images/logos are included for private stakeholder concept review only; production usage should be approved by ASC and replaced with official source assets where possible
 - No real participant data
 - No real authentication
-- No real AI/API calls
-- No Relias, Airtable, or ASC integration
+- No real AI calls
+- No Relias, Airtable, Jotform replacement, secure form storage, or ASC integration
 - Demo/sample workflow only
 
+## Project structure
+
+```text
+asc-aria/
+  web/   React/Vite frontend
+  api/   Rails API backend
+  docs/  architecture and prototype planning docs
+```
+
+Root npm scripts delegate to `web/` for convenience.
+
 ## Run locally
+
+Frontend:
 
 ```bash
 npm install
@@ -51,13 +68,36 @@ Then open:
 http://127.0.0.1:5173
 ```
 
+Rails API:
+
+```bash
+cd api
+bundle install
+bin/rails db:prepare
+bin/rails server -p 3000
+```
+
+API health check:
+
+```text
+http://127.0.0.1:3000/api/v1/health
+```
+
+Admin API endpoints require `ASC_ARIA_ADMIN_API_TOKEN` and an `Authorization: Bearer <token>` or `X-ASC-ARIA-ADMIN-TOKEN` header. Public bootstrap data intentionally excludes fake user email/phone/external identifier details.
+
 ## Verify
 
 ```bash
 npm run lint
 npm run build
-node scripts/desktop-check.mjs
-node scripts/mobile-check.mjs
+node web/scripts/desktop-check.mjs
+node web/scripts/mobile-check.mjs
+
+cd api
+bin/rails test
+bin/rubocop
+bin/brakeman -q
+bin/bundler-audit check
 ```
 
 The check scripts use local Chrome/Chromium via `puppeteer-core` to verify mobile/desktop viewport dimensions and capture screenshots in `/tmp`. Set `CHECK_URL` if the dev server is running on a non-default port. Set `CHROME_PATH` or `PUPPETEER_EXECUTABLE_PATH` if Chrome/Chromium is not installed in a standard macOS, Linux, or Windows location.
@@ -67,7 +107,7 @@ The check scripts use local Chrome/Chromium via `puppeteer-core` to verify mobil
 With the dev server running:
 
 ```bash
-node scripts/capture-screenshots.mjs
+node web/scripts/capture-screenshots.mjs
 ```
 
 The script reads `CHECK_URL` and defaults to `http://127.0.0.1:5173`. Set `SCREENSHOT_DIR` to override the output directory and `CHROME_PATH` or `PUPPETEER_EXECUTABLE_PATH` to point at a custom Chrome/Chromium executable. Generated screenshot files:

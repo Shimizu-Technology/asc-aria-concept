@@ -79,6 +79,18 @@ Talking points:
 - The production system should log handoffs, verification, Relias lookup requests, staff-entered facts, AI drafts, edits, approvals, and final responses.
 - This is the compliance story: ARIA is supervised, source-grounded, and auditable.
 
+### 7. Optional next-phase discussion: secure form intake
+
+If stakeholders ask what else the platform could absorb, mention the current external Jotform-style enrollment flow.
+
+Talking points:
+
+- ASC currently has participant form workflows that can send users away from the ASC website.
+- A future Rails-backed phase could replace those with secure, ASC-owned forms inside the site/app.
+- Staff could see submissions in an admin queue, assign them, request more information, export packets, and mark them complete.
+- This is not part of the current frontend-only demo because enrollment forms may collect SSNs, DOBs, beneficiary details, signatures, and attachments.
+- It becomes a backend/security scope: authentication, encryption, role-based access, audit logs, file handling, retention, and approved notification rules.
+
 ## Boundaries to state clearly
 
 - Public ASC copy/images/logos are used for private stakeholder concept review and should be replaced with ASC-approved source assets before production.
@@ -87,6 +99,7 @@ Talking points:
 - No live AI calls.
 - No Relias integration.
 - No Airtable integration yet.
+- No real Jotform replacement or secure form submission storage yet.
 - No tax, legal, investment, or financial advice.
 - Final eligibility must be subject to ASC review and plan documents.
 

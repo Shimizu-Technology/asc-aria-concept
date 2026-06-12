@@ -55,6 +55,7 @@ Responsibilities:
 - chat sessions and chat messages
 - staff review queue
 - support requests
+- secure form intake and submissions
 - Airtable sync
 - structured plan-rule tables
 - knowledge base and retrieval
@@ -77,6 +78,7 @@ Why Rails:
 Responsibilities:
 
 - app data
+- secure form submissions and staff workflow state
 - synced plan rules
 - normalized knowledge entries/chunks
 - chat/session history
@@ -156,6 +158,14 @@ Discovery notes describe two ASC systems relevant to ARIA:
   - plan-specific nuances for each employer plan, using only ASC-approved or sanitized source records in prototypes
 - less sensitive than Relias because it is rules/reference data rather than personal account data
 - practical first integration target
+
+### Jotform / external form links
+
+- the current ASC public experience includes at least one external Jotform enrollment flow
+- example observed: Retirement Plan Enrollment Form hosted at `form.jotform.com/250117028657859`
+- the form collects sensitive participant information, including SSN/Tax ID fields
+- good candidate for future replacement with ASC-owned secure form intake inside the app
+- should not be reimplemented until backend, auth, storage, audit, retention, and staff workflow requirements are defined
 
 ## Recommended data architecture
 
@@ -316,6 +326,105 @@ Instead:
    - existing active loan count
 6. Rails combines staff-entered facts + structured plan rules + approved explanatory content.
 7. ARIA prepares a response for staff approval or supervised delivery.
+
+## Secure form intake + admin submissions
+
+A strong future extension is to replace external Jotform enrollment/intake flows with secure, ASC-owned forms inside the website/app.
+
+Recommended product framing:
+
+> ASC participants should not have to leave the ASC digital experience to complete high-trust enrollment or request forms. Sensitive intake should happen in a secure ASC-owned flow with staff review, audit history, and controlled exports/handoffs.
+
+This should be treated as a backend/security phase, not a frontend-only prototype feature.
+
+### Participant-facing form flow
+
+Possible embedded flows:
+
+- retirement plan enrollment
+- beneficiary update request
+- distribution/loan intake precheck
+- contact/update information
+- request proposal / employer intake
+- document upload for ASC staff review, if approved
+
+User experience:
+
+```text
+Participant opens ASC form
+  ↓
+Form explains privacy and required information
+  ↓
+User completes plan-aware fields
+  ↓
+User reviews before submit
+  ↓
+Rails stores encrypted submission and attachments
+  ↓
+Staff queue receives new submission
+  ↓
+Staff reviews, requests more info, exports, or marks completed
+  ↓
+Audit trail records every action
+```
+
+### Admin/staff submission dashboard
+
+Staff should be able to:
+
+- view new submissions
+- filter by form type, employer/plan, status, assigned staff, and date
+- assign/reassign submissions
+- add internal notes
+- request more information from the participant
+- mark statuses such as `new`, `in_review`, `needs_info`, `ready_for_processing`, `completed`, `rejected`, `archived`
+- export PDF/CSV packets when ASC needs offline or third-party processing
+- see submission history and audit events
+
+### Suggested form models
+
+```text
+FormDefinition
+FormFieldDefinition
+FormSubmission
+FormSubmissionFieldValue
+FormSubmissionAttachment
+FormSubmissionStatusEvent
+FormSubmissionAssignment
+FormSubmissionNote
+FormSubmissionExport
+```
+
+### Security requirements
+
+Because enrollment forms may collect SSNs, addresses, DOBs, signatures, beneficiary details, and other sensitive data, production requirements should include:
+
+- HTTPS-only secure submission flow
+- authenticated or strongly verified submission where appropriate
+- encryption at rest for sensitive field values
+- field-level redaction/masking in admin UI
+- role-based access control
+- staff/admin audit logs
+- attachment scanning and access controls
+- data retention and deletion policy approved by ASC
+- notification policy that avoids sending sensitive data over email/SMS
+- no sensitive form values passed into public ARIA prompts or general LLM context
+
+### Relationship to ARIA
+
+ARIA can help users find the right form and explain general requirements, but should not collect SSNs or sensitive enrollment details in public chat.
+
+Safe pattern:
+
+```text
+Public ARIA helps identify the right form
+  ↓
+Secure form flow collects sensitive data
+  ↓
+Admin dashboard manages submissions
+  ↓
+Staff can use ARIA summaries only from approved, minimal, redacted context
+```
 
 ## Staff dashboard requirements
 

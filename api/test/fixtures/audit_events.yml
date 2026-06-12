@@ -1,0 +1,7 @@
+seeded:
+  action: prototype_seeded
+  actor_id: <%= ActiveRecord::FixtureSet.identify(:supervisor_user) %>
+  auditable_type:
+  auditable_id:
+  metadata: {}
+  occurred_at: 2026-06-12 10:13:03

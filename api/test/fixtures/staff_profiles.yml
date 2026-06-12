@@ -1,0 +1,9 @@
+staff_profile:
+  user: staff_user
+  title: Participant Support Associate
+  department: Participant Support
+
+supervisor_profile:
+  user: supervisor_user
+  title: Support Supervisor
+  department: Participant Support

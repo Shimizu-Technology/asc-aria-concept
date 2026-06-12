@@ -289,6 +289,86 @@ Staff approves, edits, sends, or takes over
 Audit trail records all actions
 ```
 
+## Secure form intake + admin submissions
+
+The same secure-support architecture can also replace external form tools such as Jotform for high-trust participant intake.
+
+Observed current-state example:
+
+```text
+Retirement Plan Enrollment Form
+https://form.jotform.com/250117028657859
+```
+
+This kind of flow should eventually live inside ASC's own secure web experience rather than sending participants to a third-party form host.
+
+### Why this belongs in the ASC platform
+
+- keeps participants inside the ASC digital experience
+- creates a cleaner mobile-friendly enrollment path
+- gives ASC staff one dashboard for submissions, notes, statuses, and follow-up
+- improves auditability over who viewed/processed sensitive submissions
+- allows plan-aware form routing and validation over time
+- avoids treating forms as disconnected PDFs/Jotforms/live-chat handoffs
+
+### Important boundary
+
+This is not just a frontend form. Retirement/enrollment forms can include sensitive information such as SSN/Tax ID, DOB, address, beneficiary information, employment/plan data, signatures, and attachments.
+
+Do not build real submission handling until the backend/security phase includes:
+
+- Rails/Postgres persistence
+- encryption at rest for sensitive fields
+- role-based staff/admin access
+- audit events for viewing, editing, exporting, and status changes
+- data retention/deletion policy
+- secure file upload/attachment policy
+- participant verification/authentication path
+- approved notification rules that do not leak PII
+
+### Recommended submission workflow
+
+```text
+Participant chooses a form
+  ↓
+ARIA or page routing confirms form type / plan context
+  ↓
+Secure form collects required fields
+  ↓
+Participant reviews and submits
+  ↓
+Staff submission queue receives item
+  ↓
+Staff assigns, reviews, requests more info, exports, or completes
+  ↓
+Audit trail records submission lifecycle
+```
+
+### Staff submission statuses
+
+```text
+New
+In Review
+Needs More Info
+Ready for Processing
+Exported
+Completed
+Rejected / Not Applicable
+Archived
+```
+
+### Admin submission dashboard should support
+
+- queue of all form submissions
+- filters by form type, employer/plan, status, assigned staff, and date
+- staff assignment/reassignment
+- internal notes
+- participant follow-up requests
+- PDF/CSV export or packet generation
+- attachment viewing/downloading with audit logs
+- status history
+- retention/archive controls
+
 ## Admin dashboard requirement
 
 Admin/supervisor users need broader oversight.

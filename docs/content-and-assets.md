@@ -11,8 +11,8 @@ Public ASC Trust pages/posts were discovered from the WordPress public sitemaps 
 
 Imported result:
 
-- 45 public pages/posts represented in `src/ascSiteData.ts`
-- 131 public image references optimized into `public/asc-assets/full/`
+- 45 public pages/posts represented in `web/src/ascSiteData.ts`
+- 131 public image references optimized into `web/public/asc-assets/full/`
 - Source URLs preserved per page and per image asset so ASC can review provenance
 
 The scrape was intentionally limited to publicly available ASC website pages/media. WordPress REST API access was blocked by site security, so public sitemap + HTML extraction was used instead.
@@ -22,8 +22,8 @@ The scrape was intentionally limited to publicly available ASC website pages/med
 The private concept preview stores ASC public site assets under:
 
 ```text
-public/asc-assets/
-public/asc-assets/full/
+web/public/asc-assets/
+web/public/asc-assets/full/
 ```
 
 Included asset types:
