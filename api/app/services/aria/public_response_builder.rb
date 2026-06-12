@@ -1,6 +1,7 @@
 module Aria
   class PublicResponseBuilder
     Response = Struct.new(:content, :metadata, keyword_init: true)
+    MAX_RESPONSE_CONTENT_LENGTH = ChatMessage::MAX_CONTENT_LENGTH
 
     def initialize(message:, classification:, client: Ai::OpenRouterClient.new)
       @message = message.to_s.strip
@@ -38,7 +39,7 @@ module Aria
       return nil unless response.success?
 
       Response.new(
-        content: response.content,
+        content: bounded_content(response.content),
         metadata: base_metadata.merge(
           ai_used: true,
           response_mode: "openrouter_grounded",
@@ -59,6 +60,10 @@ module Aria
           openrouter_configured: client.configured?
         )
       )
+    end
+
+    def bounded_content(content)
+      content.to_s.strip.truncate(MAX_RESPONSE_CONTENT_LENGTH, omission: "…")
     end
 
     def prompt_messages

@@ -55,6 +55,20 @@ class Aria::PublicResponseBuilderTest < ActiveSupport::TestCase
     assert_equal 1, client.calls.length
   end
 
+  test "caps verbose AI responses to chat message limit" do
+    classification = Aria::Classifier.new("What is a 401(k) loan?").call
+    client = FakeClient.new(response: "a" * (ChatMessage::MAX_CONTENT_LENGTH + 100))
+
+    response = Aria::PublicResponseBuilder.new(
+      message: "What is a 401(k) loan?",
+      classification: classification,
+      client: client
+    ).call
+
+    assert_equal ChatMessage::MAX_CONTENT_LENGTH, response.content.length
+    assert response.content.end_with?("…")
+  end
+
   test "falls back when OpenRouter is not configured" do
     classification = Aria::Classifier.new("What is a 401(k) loan?").call
     client = FakeClient.new(configured: false)

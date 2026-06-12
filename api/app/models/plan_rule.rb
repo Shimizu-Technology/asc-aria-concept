@@ -8,9 +8,12 @@ class PlanRule < ApplicationRecord
   scope :for_employer, ->(employer_name) { where("LOWER(employer_name) = ?", employer_name.to_s.downcase) }
   scope :matching_public_message, lambda { |message|
     normalized_message = message.to_s.downcase
+    escaped_employer_name = "REPLACE(REPLACE(REPLACE(LOWER(employer_name), '\\', '\\\\'), '%', '\\%'), '_', '\\_')"
+    escaped_plan_name = "REPLACE(REPLACE(REPLACE(LOWER(plan_name), '\\', '\\\\'), '%', '\\%'), '_', '\\_')"
 
     where(
-      "LOWER(?) LIKE '%' || LOWER(employer_name) || '%' OR LOWER(?) LIKE '%' || LOWER(plan_name) || '%'",
+      "LOWER(?) LIKE '%' || #{escaped_employer_name} || '%' ESCAPE '\\' OR " \
+        "LOWER(?) LIKE '%' || #{escaped_plan_name} || '%' ESCAPE '\\'",
       normalized_message,
       normalized_message
     )
