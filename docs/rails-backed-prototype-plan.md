@@ -45,13 +45,13 @@ Goal: show how ARIA would answer general questions and route account-specific qu
 
 Build:
 
-- public ARIA chat panel
-- persisted public chat session
-- deterministic intent detection for known sensitive/account-specific patterns
-- local seeded knowledge for retirement-plan/general ASC information
-- local seeded plan-rule data that mimics Airtable
-- controlled/scripted responses first
-- optional LLM/OpenRouter later only after the deterministic safe flow works
+- public ARIA chat panel — implemented with Rails-backed sessions/messages
+- persisted public chat session — implemented
+- deterministic intent detection for known sensitive/account-specific patterns — implemented
+- local seeded knowledge for retirement-plan/general ASC information — implemented
+- local seeded plan-rule data that mimics Airtable — implemented
+- controlled/scripted fallback responses first — implemented
+- optional LLM/OpenRouter through Rails only — implemented for safe public intents, defaulting to `google/gemini-2.5-flash` via `OPENROUTER_MODEL`
 
 Important:
 
@@ -314,7 +314,7 @@ Initial routes:
 
 ```text
 POST /api/v1/chat/public_sessions
-POST /api/v1/chat/public_sessions/:id/messages
+POST /api/v1/chat/public_sessions/:token/messages
 POST /api/v1/handoffs
 POST /api/v1/handoffs/:token/verify_demo
 GET  /api/v1/secure_chat_sessions/:id
@@ -328,8 +328,8 @@ POST /api/v1/staff/sessions/:id/approve
 
 Acceptance criteria:
 
-- user can ask public ARIA a general question
-- account-specific question creates secure handoff
+- user can ask public ARIA a general question — implemented for public sessions
+- account-specific question creates secure handoff CTA — implemented; persisted `HandoffToken` comes next
 - fake verification creates/resumes secure session
 - staff queue shows session
 - staff enters fake verified facts

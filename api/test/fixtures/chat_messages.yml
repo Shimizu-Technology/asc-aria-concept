@@ -1,0 +1,13 @@
+open_session_welcome:
+  chat_session: open_session (PublicChatSession)
+  role: assistant
+  content: Buenos! I can help with forms, general 401(k) questions, and next steps.
+  metadata: {}
+  occurred_at: 2026-06-12 10:13:03
+
+open_session_user:
+  chat_session: open_session (PublicChatSession)
+  role: user
+  content: What is a 401(k) loan?
+  metadata: {}
+  occurred_at: 2026-06-12 10:13:04

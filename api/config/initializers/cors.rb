@@ -30,5 +30,10 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
       headers: :any,
       methods: public_read_methods,
       expose: [ "Content-Type" ]
+
+    resource "/api/v1/chat/public_sessions*",
+      headers: :any,
+      methods: [ :get, :post, :head, :options ],
+      expose: [ "Content-Type" ]
   end
 end
