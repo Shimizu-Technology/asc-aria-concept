@@ -39,8 +39,48 @@ class Api::V1::VerificationChallengesControllerTest < ActionDispatch::Integratio
     assert_equal "email", challenge.fetch("channel")
     assert_equal "sent", challenge.fetch("status")
     assert_equal "ma***o@example.test", challenge.fetch("contact_masked")
+    assert_not challenge.key?("delivery")
     assert_match(/\A\d{6}\z/, challenge.fetch("demo_code"))
     assert AuditEvent.where(action: "verification_challenge_requested").exists?
+  end
+
+  test "challenge request does not reveal directory match through public handoff status" do
+    matched_handoff = HandoffToken.create!(intent: "participant_specific", topic: "401(k) loan eligibility")
+    unmatched_handoff = HandoffToken.create!(intent: "participant_specific", topic: "401(k) loan eligibility")
+
+    post api_v1_handoff_verification_challenges_url(matched_handoff.token), params: {
+      verification_challenge: {
+        channel: "email",
+        contact: "malia.demo@example.test"
+      }
+    }
+    assert_response :created
+
+    post api_v1_handoff_verification_challenges_url(unmatched_handoff.token), params: {
+      verification_challenge: {
+        channel: "email",
+        contact: "unknown@example.test"
+      }
+    }
+    assert_response :created
+
+    assert_equal "challenge_sent", matched_handoff.reload.status
+    assert_equal "challenge_sent", unmatched_handoff.reload.status
+    assert_nil matched_handoff.participant_directory_entry
+    assert_nil unmatched_handoff.participant_directory_entry
+
+    get api_v1_handoff_url(matched_handoff.token)
+    assert_response :success
+    matched_payload = JSON.parse(response.body).fetch("handoff")
+
+    get api_v1_handoff_url(unmatched_handoff.token)
+    assert_response :success
+    unmatched_payload = JSON.parse(response.body).fetch("handoff")
+
+    assert_equal "challenge_sent", matched_payload.fetch("status")
+    assert_equal "challenge_sent", unmatched_payload.fetch("status")
+    assert_not matched_payload.key?("participant")
+    assert_not unmatched_payload.key?("participant")
   end
 
   test "challenge request succeeds when audit recording fails after persistence" do

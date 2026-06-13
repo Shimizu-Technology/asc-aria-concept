@@ -30,8 +30,8 @@ class HandoffToken < ApplicationRecord
     !expired? && status.in?(%w[pending challenge_sent])
   end
 
-  def mark_challenge_sent!(challenge)
-    update!(status: "challenge_sent", participant_directory_entry: challenge.participant_directory_entry)
+  def mark_challenge_sent!
+    update!(status: "challenge_sent")
   end
 
   def mark_verified!(participant_entry)
@@ -54,7 +54,6 @@ class HandoffToken < ApplicationRecord
       summary: summary,
       expires_at: expires_at&.iso8601,
       used_at: used_at&.iso8601,
-      participant: participant_directory_entry&.as_api_json,
       metadata: metadata || {}
     }
   end

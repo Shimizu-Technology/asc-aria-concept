@@ -19,16 +19,16 @@ module SecureSupport
 
       participant = ParticipantDirectoryEntry.find_active_by_contact(channel: channel, contact: normalized_contact)
       code = generate_code
-      challenge = create_challenge!(participant: participant, contact: normalized_contact, code: code)
+      challenge = nil
       delivery = nil
 
-      if participant
-        delivery = VerificationDelivery.deliver!(challenge: challenge, code: code, contact: normalized_contact)
-        handoff_token.mark_challenge_sent!(challenge) if challenge.status.in?(%w[sent pending])
-      else
-        challenge.update!(status: "sent", sent_at: Time.current, metadata: challenge.metadata.merge(unmatched_contact: true))
+      HandoffToken.transaction do
+        challenge = create_challenge!(participant: participant, contact: normalized_contact, code: code)
+        challenge.update!(status: "sent", sent_at: Time.current, metadata: challenge.metadata.merge(unmatched_contact: true)) unless participant
+        handoff_token.mark_challenge_sent!
       end
 
+      delivery = VerificationDelivery.deliver!(challenge: challenge, code: code, contact: normalized_contact) if participant
       record_audit_event_safely(challenge: challenge, participant: participant)
 
       Result.new(

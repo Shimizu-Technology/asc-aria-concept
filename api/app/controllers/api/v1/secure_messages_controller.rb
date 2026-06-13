@@ -17,11 +17,7 @@ module Api
           secure_chat_session.touch_last_message!(message.occurred_at)
         end
 
-        AuditEvent.record!(
-          action: "secure_participant_message_received",
-          auditable: secure_chat_session,
-          metadata: { message_id: message.id, fake_data_only: true }
-        )
+        record_secure_message_audit_safely(message)
 
         render json: { secure_chat_session: secure_chat_session.reload.as_api_json, message: message.as_api_json }, status: :created
       rescue ActiveRecord::RecordNotFound
@@ -33,6 +29,16 @@ module Api
       end
 
       private
+
+      def record_secure_message_audit_safely(message)
+        AuditEvent.record!(
+          action: "secure_participant_message_received",
+          auditable: secure_chat_session,
+          metadata: { message_id: message.id, fake_data_only: true }
+        )
+      rescue StandardError => e
+        Rails.logger.warn("[SecureMessagesController] Audit event failed: #{e.class}: #{e.message}")
+      end
 
       def secure_chat_session
         @secure_chat_session ||= SecureChatSession.find_by!(token: params[:secure_chat_session_id])

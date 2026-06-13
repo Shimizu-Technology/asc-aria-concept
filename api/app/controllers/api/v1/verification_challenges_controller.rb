@@ -10,7 +10,7 @@ module Api
 
         render json: {
           message: result.message,
-          challenge: result.challenge.as_api_json(demo_code: result.demo_code)
+          challenge: result.challenge.as_api_json(include_delivery: false, demo_code: result.demo_code)
         }, status: :created
       rescue ActiveRecord::RecordNotFound
         render_not_found("Secure handoff not found")
