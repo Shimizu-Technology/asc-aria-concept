@@ -31,19 +31,25 @@ class VerificationChallenge < ApplicationRecord
   end
 
   def verify!(submitted_code)
-    return false unless active?
-    return fail_attempt! if attempts_count >= MAX_ATTEMPTS
+    with_lock do
+      return false unless active?
+      return fail_attempt! if attempts_count >= MAX_ATTEMPTS
 
-    increment!(:attempts_count)
+      self.attempts_count += 1
 
-    if secure_code_match?(submitted_code)
-      update!(status: "verified", verified_at: Time.current)
-      true
-    elsif attempts_count >= MAX_ATTEMPTS
-      update!(status: "failed")
-      false
-    else
-      false
+      if secure_code_match?(submitted_code)
+        self.status = "verified"
+        self.verified_at = Time.current
+        save!
+        true
+      elsif attempts_count >= MAX_ATTEMPTS
+        self.status = "failed"
+        save!
+        false
+      else
+        save!
+        false
+      end
     end
   end
 

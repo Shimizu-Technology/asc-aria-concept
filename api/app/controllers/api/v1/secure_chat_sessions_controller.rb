@@ -1,3 +1,5 @@
+require "digest"
+
 module Api
   module V1
     class SecureChatSessionsController < Api::V1::BaseController
@@ -21,9 +23,20 @@ module Api
       end
 
       def authenticate_secure_access!
-        return if secure_access_session.token == secure_access_token && !secure_access_session.expired?
+        return if secure_access_token_matches? && !secure_access_session.expired?
 
         render json: { error: "Secure access session is invalid or expired" }, status: :unauthorized
+      end
+
+      def secure_access_token_matches?
+        provided_token = secure_access_token.to_s
+        expected_token = secure_access_session.token.to_s
+        return false if provided_token.blank? || expected_token.blank?
+
+        ActiveSupport::SecurityUtils.secure_compare(
+          Digest::SHA256.hexdigest(provided_token),
+          Digest::SHA256.hexdigest(expected_token)
+        )
       end
 
       def secure_access_token

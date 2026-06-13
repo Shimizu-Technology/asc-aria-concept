@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_13_010002) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_13_010004) do
   create_table "audit_events", force: :cascade do |t|
     t.string "action", null: false
     t.integer "actor_id"
@@ -106,14 +106,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_010002) do
   create_table "participant_directory_entries", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "display_name", null: false
-    t.string "email"
     t.string "email_digest"
+    t.string "email_masked"
     t.string "employer_name", null: false
     t.string "external_identifier", null: false
     t.json "metadata", default: {}, null: false
-    t.string "phone"
     t.string "phone_digest"
-    t.string "phone_e164"
+    t.string "phone_masked"
     t.string "plan_name", null: false
     t.string "status", default: "active", null: false
     t.datetime "updated_at", null: false
@@ -197,6 +196,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_010002) do
     t.string "token", null: false
     t.datetime "updated_at", null: false
     t.index ["expires_at"], name: "index_secure_access_sessions_on_expires_at"
+    t.index ["handoff_token_id"], name: "idx_secure_access_sessions_unique_handoff", unique: true
     t.index ["handoff_token_id"], name: "index_secure_access_sessions_on_handoff_token_id"
     t.index ["participant_directory_entry_id"], name: "index_secure_access_sessions_on_participant_directory_entry_id"
     t.index ["status"], name: "index_secure_access_sessions_on_status"
@@ -218,6 +218,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_010002) do
     t.string "topic"
     t.datetime "updated_at", null: false
     t.index ["employer_name", "plan_name"], name: "idx_secure_chat_sessions_on_employer_plan"
+    t.index ["handoff_token_id"], name: "idx_secure_chat_sessions_unique_handoff", unique: true
     t.index ["handoff_token_id"], name: "index_secure_chat_sessions_on_handoff_token_id"
     t.index ["last_message_at"], name: "index_secure_chat_sessions_on_last_message_at"
     t.index ["participant_directory_entry_id"], name: "index_secure_chat_sessions_on_participant_directory_entry_id"

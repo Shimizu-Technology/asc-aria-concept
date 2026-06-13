@@ -8,12 +8,12 @@ module SecureSupport
     end
 
     def call
-      raise ArgumentError, "Verification code is invalid or expired" unless challenge.participant_directory_entry
-      raise ArgumentError, "Verification code is invalid or expired" unless challenge.verify!(code)
-
       result = nil
 
       HandoffToken.transaction do
+        raise ArgumentError, "Verification code is invalid or expired" unless challenge.participant_directory_entry
+        raise ArgumentError, "Verification code is invalid or expired" unless challenge.verify!(code)
+
         participant = challenge.participant_directory_entry
         handoff = challenge.handoff_token
         handoff.mark_verified!(participant)

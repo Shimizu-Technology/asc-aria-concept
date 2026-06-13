@@ -1,6 +1,8 @@
 class ParticipantDirectoryEntry < ApplicationRecord
   STATUSES = %w[active inactive].freeze
 
+  attr_accessor :email, :phone
+
   has_many :handoff_tokens, dependent: :nullify
   has_many :verification_challenges, dependent: :nullify
   has_many :secure_access_sessions, dependent: :restrict_with_exception
@@ -34,11 +36,11 @@ class ParticipantDirectoryEntry < ApplicationRecord
   end
 
   def masked_email
-    SecureSupport::Contact.mask_email(email)
+    email_masked
   end
 
   def masked_phone
-    SecureSupport::Contact.mask_phone(phone_e164 || phone)
+    phone_masked
   end
 
   def as_api_json
@@ -48,8 +50,8 @@ class ParticipantDirectoryEntry < ApplicationRecord
       employer_name: employer_name,
       plan_name: plan_name,
       status: status,
-      masked_email: email.present? ? masked_email : nil,
-      masked_phone: phone_e164.present? ? masked_phone : nil
+      masked_email: email_masked,
+      masked_phone: phone_masked
     }
   end
 
@@ -57,12 +59,17 @@ class ParticipantDirectoryEntry < ApplicationRecord
 
   def normalize_contacts
     normalized_email = SecureSupport::Contact.normalize_email(email)
-    normalized_phone = SecureSupport::Contact.normalize_phone(phone_e164.presence || phone)
+    normalized_phone = SecureSupport::Contact.normalize_phone(phone)
 
-    self.email = normalized_email if normalized_email.present?
-    self.phone_e164 = normalized_phone if normalized_phone.present?
-    self.email_digest = SecureSupport::Contact.digest(normalized_email) if normalized_email.present?
-    self.phone_digest = SecureSupport::Contact.digest(normalized_phone) if normalized_phone.present?
+    if normalized_email.present?
+      self.email_digest = SecureSupport::Contact.digest(normalized_email)
+      self.email_masked = SecureSupport::Contact.mask_email(normalized_email)
+    end
+
+    if normalized_phone.present?
+      self.phone_digest = SecureSupport::Contact.digest(normalized_phone)
+      self.phone_masked = SecureSupport::Contact.mask_phone(normalized_phone)
+    end
   end
 
   def email_or_phone_present
