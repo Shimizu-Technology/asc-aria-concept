@@ -7,6 +7,8 @@ class User < ApplicationRecord
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true
   validates :status, presence: true
+  validates :clerk_id, uniqueness: true, allow_blank: true
+  validates :invitation_status, presence: true
 
   scope :active, -> { where(status: "active") }
 
@@ -24,6 +26,8 @@ class User < ApplicationRecord
       name: name,
       email: email,
       status: status,
+      clerk_id: clerk_id,
+      invitation_status: invitation_status,
       role: role.as_api_json,
       participant_profile: participant_profile&.as_api_json,
       staff_profile: staff_profile&.as_api_json

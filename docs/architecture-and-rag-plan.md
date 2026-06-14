@@ -1,8 +1,8 @@
 # ASC + ARIA architecture and RAG plan
 
-**Status:** planning direction for a production-shaped prototype  
-**Last updated:** 2026-06-11  
-**Related docs:** `docs/asc-public-content.md`
+**Status:** planning direction for a production-shaped prototype
+**Last updated:** 2026-06-13
+**Related docs:** `docs/asc-public-content.md`, `docs/identity-and-access-plan.md`, `docs/secure-support-workflow.md`
 
 ## Executive summary
 
@@ -86,16 +86,26 @@ Responsibilities:
 - audit events
 - optional embeddings via `pgvector` if available/appropriate
 
-### Auth
+### Auth and access
 
-Prototype options:
+Use separate access patterns for participants and internal ASC staff.
 
-- Clerk if polished third-party login is needed quickly
-- Rails/JWT demo auth if simpler for the prototype
+Participants/customers:
+
+- first secure-support pilot should use passwordless access by Resend email link/code or ClickSend SMS code
+- do not require participants to create a traditional username/password account at the start
+- sending a code to user-entered contact info proves contact control only
+- account ownership requires matching the contact to a trusted ASC participant/contact source and/or staff Relias verification
+
+ASC staff/admins:
+
+- use Clerk invite-only login for staff/admin dashboards
+- Rails verifies Clerk JWTs and resolves local `User`/`Role` records
+- Rails owns app authorization, assignments, workflow state, and audit events
 
 Production principle:
 
-- identity provider should be finalized after ASC security/compliance discovery
+- participant identity should ultimately use ASC's approved participant portal, Relias-adjacent identity source, SSO/OIDC, or an approved minimal encrypted participant directory
 - Rails should still own app roles/permissions even if identity is delegated to Clerk/Auth0/Entra/etc.
 
 ### AI provider
@@ -139,6 +149,19 @@ Render   -> optional FastAPI AI service later, if needed
 ## Source systems from discovery notes
 
 Discovery notes describe two ASC systems relevant to ARIA:
+
+### Trusted participant contact source
+
+Secure email/SMS verification requires a trusted source of participant contact methods.
+
+Possible sources:
+
+- existing ASC participant portal/contact system
+- Relias-adjacent identity/contact export if approved
+- ASC-approved minimal participant directory synced into Rails/Postgres
+- staff manual Relias verification for pilot workflows
+
+Prototype must use fake seeded participant contact records only. Do not import or store real participant contact data until ASC approves security, retention, access, and sync requirements.
 
 ### Relias
 
@@ -291,6 +314,14 @@ Rails saves user message
   ↓
 Rails classifies intent
   ↓
+If account-specific, Rails creates handoff token and passwordless verification challenge
+  ↓
+Participant verifies by email/SMS code or secure link
+  ↓
+Rails creates secure access/session records
+  ↓
+Rails classifies secure message
+  ↓
 Rails extracts employer/plan if provided
   ↓
 Rails queries structured rules
@@ -300,7 +331,7 @@ Rails retrieves approved knowledge chunks
 Rails determines if account-specific Relias data is required
   ↓
 If safe/general: generate and return ARIA response
-If sensitive/account-specific: create staff review item
+If sensitive/account-specific: create staff review item; do not reveal account facts from passwordless verification alone
   ↓
 Staff can manually check Relias and enter safe facts
   ↓
@@ -317,15 +348,16 @@ Instead:
 
 1. Participant asks ARIA about a 401(k) loan.
 2. ARIA identifies employer/plan and retrieves Airtable-synced rules.
-3. If account-specific data is needed, ARIA flags staff review.
-4. ASC associate checks Relias manually.
-5. Associate enters safe facts into the staff dashboard, such as:
+3. If account-specific data is needed, ARIA creates a secure handoff and passwordless verification flow.
+4. Passwordless verification opens the secure support room; it does not by itself authorize ARIA to reveal account facts.
+5. ASC associate checks Relias manually.
+6. Associate enters safe facts into the staff dashboard, such as:
    - verified balance
    - vested balance, if applicable
    - active/inactive employee status
    - existing active loan count
-6. Rails combines staff-entered facts + structured plan rules + approved explanatory content.
-7. ARIA prepares a response for staff approval or supervised delivery.
+7. Rails combines staff-entered facts + structured plan rules + approved explanatory content.
+8. ARIA prepares a response for staff approval or supervised delivery.
 
 ## Secure form intake + admin submissions
 

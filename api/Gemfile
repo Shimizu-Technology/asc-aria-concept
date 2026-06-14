@@ -33,6 +33,13 @@ gem "rack-cors"
 # Throttle anonymous public endpoints such as prototype ARIA chat writes
 gem "rack-attack"
 
+# Verify Clerk staff/admin JWTs and call Clerk fallback APIs when needed
+gem "jwt"
+gem "httparty"
+
+# Send passwordless secure support email codes/links through Rails only
+gem "resend"
+
 group :development, :test do
   # Load local .env files for prototype development and tests
   gem "dotenv-rails", require: "dotenv/load"

@@ -1,8 +1,8 @@
 # ASC + ARIA secure support workflow
 
-**Status:** architecture decision / build-readiness note  
-**Last updated:** 2026-06-11  
-**Related:** `docs/architecture-and-rag-plan.md`
+**Status:** architecture decision / build-readiness note
+**Last updated:** 2026-06-13
+**Related:** `docs/architecture-and-rag-plan.md`, `docs/identity-and-access-plan.md`
 
 ## Core decision
 
@@ -11,7 +11,7 @@ ARIA should have two modes:
 1. **Public ARIA** — general education, routing, FAQs, forms, and safe non-account-specific help.
 2. **Secure ARIA Support** — authenticated participant support where messages are saved, staff can monitor/review, and account-specific questions can be handled with human oversight.
 
-The public website chatbot should not become the place where sensitive account-specific support happens. When a participant asks for personal eligibility, balance, loan amount, existing loan status, or anything requiring Relias/account verification, ARIA should hand the user off to a dedicated authenticated support page.
+The public website chatbot should not become the place where sensitive account-specific support happens. When a participant asks for personal eligibility, balance, loan amount, existing loan status, or anything requiring Relias/account verification, ARIA should hand the user off to a dedicated passwordless-verified secure support page.
 
 ## Recommended handoff model
 
@@ -26,9 +26,9 @@ User clicks “Continue securely”
   ↓
 Rails creates a short-lived handoff token
   ↓
-User authenticates on a secure support page
+User verifies by secure email link/code or SMS code
   ↓
-Secure chat session is created / resumed
+Secure access session and secure chat session are created / resumed
   ↓
 Staff dashboard can monitor, review, and intervene
 ```
@@ -54,7 +54,7 @@ Recommended product pattern:
 
 ```text
 Public widget = education + routing
-Authenticated page = saved private support session
+Passwordless secure page = verified private support session
 Staff dashboard = human oversight + Relias bridge
 Admin dashboard = governance, analytics, audit, knowledge controls
 ```
@@ -91,9 +91,29 @@ Buttons:
 [Continue securely] [General info only]
 ```
 
+## Participant access decision
+
+Participants should use passwordless secure access for the first pilot, not a traditional username/password account.
+
+Recommended channels:
+
+- Resend secure email link or email code
+- ClickSend SMS code
+- future ASC/Relias/participant-portal login if ASC already has an approved identity path
+
+The UX should ask for the email or mobile number ASC has on file, then respond generically:
+
+> If that information matches ASC records, we’ll send a secure code.
+
+Important security distinction:
+
+> A code sent to a user-entered email/phone proves control of that contact method. It does not prove account ownership unless that contact method is matched to a trusted ASC participant/contact source.
+
+Therefore, early secure support should still route account-specific facts through staff/Relias review until ASC approves a trusted identity/contact integration.
+
 ## Secure ARIA support behavior
 
-Secure ARIA lives on an authenticated page, for example:
+Secure ARIA lives on an authenticated or passwordless-verified page, for example:
 
 ```text
 /secure/aria
@@ -140,8 +160,11 @@ detected_employer_or_plan
 reason_for_handoff
 expires_at
 used_at
-authenticated_user_id
+participant_directory_entry_id optional
+secure_access_session_id
 secure_chat_session_id
+verification_channel
+verification_contact_masked
 ```
 
 The handoff should preserve only safe context:
@@ -154,27 +177,40 @@ The handoff should preserve only safe context:
 
 It should not preserve sensitive unauthenticated personal data. Public ARIA should discourage users from typing SSNs, account numbers, or private account details before authentication.
 
-## Authentication options
+## Authentication and verification options
 
-Prototype options:
+Use different access patterns for participants and ASC staff.
 
-- mocked verification screen for concept demo
-- Clerk demo login
-- email magic link
-- SMS/phone OTP
-- Rails/JWT demo auth
+### Participants
 
-Production options should be decided after ASC security discovery:
+Prototype:
 
-- existing ASC/Relias identity provider, if possible
-- SSO / SAML / OIDC
-- Auth0 / Okta / Microsoft Entra ID
-- Clerk if approved
-- custom Rails auth plus identity proofing
+- fake seeded participant directory
+- fake email/SMS verification screen
+- provider interfaces for Resend/ClickSend stubbed unless explicitly configured
+
+Pilot:
+
+- passwordless secure email link/code via Resend
+- passwordless SMS code via ClickSend
+- manual staff/Relias verification before account-specific responses
+- optional minimal ASC-approved participant contact directory if ASC approves storing/syncing contact data
+
+Production:
+
+- existing ASC/Relias/participant-portal identity provider if available
+- ASC-approved SSO/OIDC/Auth0/Okta/Entra/custom identity path if needed
+- minimal encrypted participant contact directory only after security/compliance approval
+
+### ASC staff/admins
+
+Use Clerk invite-only staff login.
+
+Clerk confirms the staff user's identity. Rails remains the source of truth for local roles, permissions, session assignment, support workflow, and audit events.
 
 Important principle:
 
-> Authentication confirms who is in the secure support session. Authorization and support workflow still live in Rails.
+> Participant passwordless access opens a secure support room; it does not by itself authorize ARIA to reveal account-specific facts. Staff/Relias verification remains required until ASC approves trusted account-data integration.
 
 ## Staff dashboard requirement
 
@@ -431,10 +467,14 @@ User
 Role
 ParticipantProfile
 StaffProfile
+ParticipantDirectoryEntry
 PublicChatSession
+SecureAccessSession
 SecureChatSession
 ChatMessage
 HandoffToken
+VerificationChallenge
+OutboundDelivery
 SupportRequest
 StaffAssignment
 StaffReview
@@ -447,6 +487,8 @@ RetrievalEvent
 AuditEvent
 ```
 
+`ParticipantDirectoryEntry`, `VerificationChallenge`, `SecureAccessSession`, and `OutboundDelivery` are described in `docs/identity-and-access-plan.md`. For the prototype, directory entries must be fake/sample only.
+
 Suggested visibility fields for messages:
 
 ```text
@@ -457,7 +499,10 @@ visibility: participant_visible | staff_only | admin_only
 Suggested audit events:
 
 - handoff token created
-- user authenticated
+- verification challenge requested
+- secure email/SMS delivery attempted
+- verification challenge verified/failed/expired
+- secure access session created
 - secure session created
 - staff viewed session
 - staff assigned/reassigned
@@ -494,7 +539,7 @@ Examples:
 
 ### Participant-specific
 
-Requires secure authenticated support and possibly staff/Relias lookup.
+Requires secure verified support and possibly staff/Relias lookup.
 
 Examples:
 
@@ -528,7 +573,7 @@ Recommended POC screens:
 1. Public ARIA widget asks/answers a general 401(k) loan question.
 2. User asks an account-specific question.
 3. ARIA offers “Continue securely.”
-4. Fake authentication/verification screen.
+4. Fake passwordless verification screen for email/SMS code.
 5. Secure ARIA support page with saved-session feel.
 6. Staff dashboard queue shows the session as `Needs Relias Lookup`.
 7. Staff detail view shows required fields.
@@ -538,10 +583,10 @@ Recommended POC screens:
 11. Participant sees approved response in secure chat.
 12. Admin/audit preview shows source/staff/action history.
 
-POC data must remain fake/sample/sanitized.
+POC data must remain fake/sample/sanitized. No live email/SMS should be sent unless explicit test credentials, live-send flags, and approved test recipients are configured.
 
 ## Final product framing
 
 Use this language with ASC stakeholders:
 
-> ARIA starts as a public assistant for general education and routing. When a participant asks something account-specific, ARIA moves them into a secure authenticated support session. From there, ASC staff can monitor, verify Relias information manually when needed, approve AI-drafted responses, or take over the conversation. Every message, source, staff action, and response is saved in an audit trail.
+> ARIA starts as a public assistant for general education and routing. When a participant asks something account-specific, ARIA moves them into a passwordless secure support session using a secure email or text code. From there, ASC staff can monitor, verify Relias information manually when needed, approve AI-drafted responses, or take over the conversation. Every message, source, staff action, verification step, and response is saved in an audit trail.

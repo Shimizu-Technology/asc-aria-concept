@@ -1593,6 +1593,90 @@ p {
   background: #f6fbff;
 }
 
+.centered-card {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.centered-actions {
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+
+.inline-user-button {
+  position: static;
+  width: fit-content;
+  margin: 1rem auto 0;
+}
+
+.staff-user-button {
+  position: fixed;
+  right: clamp(1rem, 2vw, 2rem);
+  top: clamp(5rem, 8vw, 6.5rem);
+  z-index: 75;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.45rem 0.35rem 0.7rem;
+  border: 1px solid rgba(37, 52, 122, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 16px 38px rgba(8, 31, 58, 0.12);
+}
+
+.staff-user-button span {
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.verification-form {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.verification-form label {
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.verification-form input,
+.verification-form select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid rgba(37, 52, 122, 0.18);
+  background: #ffffff;
+  color: var(--ink);
+  padding: 0.8rem 0.9rem;
+  font: inherit;
+}
+
+.verification-form input:focus,
+.verification-form select:focus {
+  outline: 3px solid rgba(61, 179, 227, 0.18);
+  border-color: rgba(61, 179, 227, 0.75);
+}
+
+.code-form {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(37, 52, 122, 0.12);
+}
+
+.demo-code-note {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.demo-code-note strong {
+  color: var(--blue);
+  letter-spacing: 0.12em;
+}
+
 .context-box span,
 .review-list span,
 .panel-header span,

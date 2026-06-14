@@ -1,8 +1,8 @@
 # ASC + ARIA Rails/React application prototype plan
 
 **Status:** decided next implementation direction
-**Last updated:** 2026-06-11
-**Related docs:** `docs/build-readiness-plan.md`, `docs/architecture-and-rag-plan.md`, `docs/secure-support-workflow.md`
+**Last updated:** 2026-06-13
+**Related docs:** `docs/build-readiness-plan.md`, `docs/architecture-and-rag-plan.md`, `docs/secure-support-workflow.md`, `docs/identity-and-access-plan.md`
 
 ## Decision
 
@@ -11,8 +11,8 @@ Build the next version as an actual **React frontend + Rails backend prototype a
 The current frontend concept proves the ASC website modernization direction. The next step is to build a working private prototype that demonstrates the real product shape:
 
 1. ARIA chatbot experience.
-2. Simple public-to-secure handoff.
-3. Staff/admin dashboard for reviewing chats.
+2. Simple public-to-secure handoff with passwordless participant verification.
+3. Staff/admin dashboard for reviewing chats, using Clerk for internal staff auth later.
 4. Embedded retirement/enrollment form based on ASC's current Jotform-style flow.
 5. Admin dashboard for viewing and responding to form submissions.
 6. Audit/status history that makes the compliance story concrete.
@@ -59,18 +59,28 @@ Important:
 - Do not let ARIA answer account-specific questions from model memory.
 - Use curated public ASC content, seeded plan rules, and approved fake data.
 
-### 2. Simple secure handoff
+### 2. Passwordless secure handoff
 
-Goal: show a working public-to-secure workflow without real auth.
+Goal: show a working public-to-secure workflow that is easy for non-technical participants and safe for account-specific support.
 
 Build:
 
 - handoff record/token when user asks an account-specific question
-- fake secure verification page
+- fake seeded participant directory with sample email/phone contacts only
+- fake passwordless verification page for secure email/SMS code
+- verification challenge model that stores code digests, not raw codes
+- provider-facing delivery layer shaped for Resend email and ClickSend SMS, with live sends disabled by default
+- secure access session creation after verification
 - secure chat session creation/resume
-- status: waiting on staff verification
+- status: waiting on staff/Relias verification
 - staff queue entry
-- audit events for handoff, verification, staff review, draft, approval
+- audit events for handoff, challenge request, delivery attempt, verification, staff review, draft, approval
+
+Important:
+
+- Sending a code to a user-entered contact proves contact control only.
+- It does not prove account ownership unless that contact is matched against a trusted ASC source.
+- For prototype and early pilot, account-specific answers still require staff/Relias review.
 
 ### 3. Staff/admin chat dashboard
 
@@ -182,6 +192,26 @@ Pacific Sample 403(b)
 - notes: participants should contact ASC for alternatives
 ```
 
+### Fake participant directory
+
+Seed fake contact records for passwordless verification demos:
+
+```text
+Malia Santos Demo
+- employer/plan: Bank of Mila 401(k)
+- email: malia.demo@example.test
+- phone: +16715550100
+- active: yes
+
+Tasi Cruz Demo
+- employer/plan: Guam Demo Employer 401(k)
+- email: tasi.demo@example.test
+- phone: +16715550101
+- active: yes
+```
+
+These records are not real participant data. They exist only to demonstrate the secure-code workflow and staff queue handoff.
+
 ### Fake Relias bridge values
 
 Staff enters fake structured facts:
@@ -229,8 +259,9 @@ Use:
 - Production Jotform replacement.
 - Real Relias integration.
 - Real Airtable sync.
-- Real authentication/SSO.
+- Real participant authentication/SSO or real participant contact sync.
 - Live AI responses using sensitive participant context.
+- Live email/SMS to real participants.
 - Public launch.
 
 ## Recommended repo shape
@@ -299,9 +330,13 @@ Build models:
 
 ```text
 PublicChatSession
+ParticipantDirectoryEntry
+SecureAccessSession
 SecureChatSession
 ChatMessage
 HandoffToken
+VerificationChallenge
+OutboundDelivery
 SupportRequest
 StaffReview
 StaffVerifiedFact
@@ -316,7 +351,9 @@ Initial routes:
 POST /api/v1/chat/public_sessions
 POST /api/v1/chat/public_sessions/:token/messages
 POST /api/v1/handoffs
-POST /api/v1/handoffs/:token/verify_demo
+GET  /api/v1/handoffs/:token
+POST /api/v1/handoffs/:token/verification_challenges
+POST /api/v1/handoffs/:token/verification_challenges/:id/verify
 GET  /api/v1/secure_chat_sessions/:id
 POST /api/v1/secure_chat_sessions/:id/messages
 GET  /api/v1/staff/sessions
@@ -330,7 +367,7 @@ Acceptance criteria:
 
 - user can ask public ARIA a general question — implemented for public sessions
 - account-specific question creates secure handoff CTA — implemented; persisted `HandoffToken` comes next
-- fake verification creates/resumes secure session
+- fake email/SMS verification creates/resumes secure access session and secure chat session
 - staff queue shows session
 - staff enters fake verified facts
 - scripted ARIA draft is generated
@@ -454,10 +491,10 @@ If ASC later wants real form submissions, production requirements include:
 
 ## Next action before implementation
 
-Create a short PRD/build checklist, then start Phase 1 with a small Rails API foundation PR.
+Rails foundation and public ARIA are now in place. The next implementation branch should build the passwordless secure handoff workflow with fake/sample data only.
 
-Recommended first implementation branch:
+Recommended next implementation branch:
 
 ```text
-feature/rails-backed-prototype-foundation
+feature/secure-handoff-workflow
 ```

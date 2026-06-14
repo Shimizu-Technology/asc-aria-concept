@@ -1,8 +1,9 @@
 # ASC + ARIA Rails/React implementation checklist
 
 **Status:** Rails-backed public ARIA chat implemented; secure handoff/staff/form workflows remain
-**Last updated:** 2026-06-11
+**Last updated:** 2026-06-13
 **Primary plan:** `docs/rails-backed-prototype-plan.md`
+**Identity/access plan:** `docs/identity-and-access-plan.md`
 
 ## Guiding principles
 
@@ -10,9 +11,11 @@
 2. **Working architecture over static mockups.** Key workflows should persist through Rails.
 3. **Controlled ARIA first.** Use deterministic classification, seeded knowledge, fake plan rules, and scripted/template responses before adding any live LLM.
 4. **Staff stays in control.** Account-specific support requires staff review/approval.
-5. **Secure form intake is a prototype.** The form should demonstrate workflow, not collect real sensitive data.
-6. **Audit everything important.** Handoffs, verification, staff facts, drafts, approvals, form status changes, notes, responses, and exports should create audit/status events.
-7. **Keep the ASC-facing UI polished.** Do not regress the website modernization design.
+5. **Participants use passwordless secure access first.** Do not require a traditional participant account for the early secure support flow.
+6. **Contact control is not account ownership.** Email/SMS verification proves the user controls that contact method; account-specific facts still require trusted ASC data or staff/Relias verification.
+7. **Secure form intake is a prototype.** The form should demonstrate workflow, not collect real sensitive data.
+8. **Audit everything important.** Handoffs, verification challenges, email/SMS delivery attempts, staff facts, drafts, approvals, form status changes, notes, responses, and exports should create audit/status events.
+9. **Keep the ASC-facing UI polished.** Do not regress the website modernization design.
 
 ## Target repo shape
 
@@ -40,7 +43,7 @@ This keeps deployment/build docs clear while creating room for the Rails backend
 | Staff | Reviews support sessions and form submissions. |
 | Admin/Supervisor | Views audit dashboard, all sessions, all submissions. |
 
-For prototype, roles can be seeded/mock-authenticated.
+For prototype, roles can be seeded/mock-authenticated. For production-shaped staff/admin access, use Clerk invite-only login with Rails-owned local roles. Participants should use passwordless secure email/SMS access unless ASC later chooses a participant portal/SSO path.
 
 ## Fake seed data
 
@@ -56,6 +59,13 @@ For prototype, roles can be seeded/mock-authenticated.
 - [x] `Guam Demo Employer 401(k)` — loans allowed, max 2 active loans, 5-year repayment
 - [x] `Pacific Sample 403(b)` — loans not allowed
 - [x] `Demo Government Plan` — plan-specific caveats
+
+### Fake participant directory
+
+- [ ] Fake participant directory entry with demo email and phone
+- [ ] Fake directory entry tied to `Bank of Mila 401(k)`
+- [ ] Fake directory entry tied to `Guam Demo Employer 401(k)`
+- [ ] No real participant contact data in seeds
 
 ### Knowledge entries
 
@@ -79,9 +89,13 @@ For prototype, roles can be seeded/mock-authenticated.
 ### Chat / ARIA
 
 - [x] `PublicChatSession`
+- [ ] `ParticipantDirectoryEntry`
+- [ ] `SecureAccessSession`
 - [ ] `SecureChatSession`
 - [x] `ChatMessage`
 - [ ] `HandoffToken`
+- [ ] `VerificationChallenge`
+- [ ] `OutboundDelivery` or lightweight delivery log
 - [ ] `SupportRequest`
 - [ ] `StaffReview`
 - [ ] `StaffVerifiedFact`
@@ -124,7 +138,9 @@ Attachment model can wait unless we decide to demo upload placeholders:
 ### Secure handoff / secure chat
 
 - [ ] `POST /api/v1/handoffs`
-- [ ] `POST /api/v1/handoffs/:token/verify_demo`
+- [ ] `GET /api/v1/handoffs/:token`
+- [ ] `POST /api/v1/handoffs/:token/verification_challenges`
+- [ ] `POST /api/v1/handoffs/:token/verification_challenges/:id/verify`
 - [ ] `GET /api/v1/secure_chat_sessions/:id`
 - [ ] `POST /api/v1/secure_chat_sessions/:id/messages`
 
@@ -168,7 +184,9 @@ Attachment model can wait unless we decide to demo upload placeholders:
 
 ### Secure support
 
-- [ ] Fake verification screen consumes handoff token.
+- [ ] Fake passwordless verification screen consumes handoff token.
+- [ ] User can choose demo email or SMS channel.
+- [ ] Verification UI uses generic anti-enumeration wording.
 - [ ] Secure chat loads from Rails.
 - [ ] Participant sees waiting-on-staff status.
 - [ ] Approved staff response appears in secure chat.
@@ -243,7 +261,10 @@ Classify messages as:
 - [x] public chat session created
 - [x] public message received
 - [ ] secure handoff created
+- [ ] verification challenge requested
+- [ ] secure email/SMS delivery attempted
 - [ ] demo verification completed
+- [ ] secure access session created
 - [ ] secure session created
 - [ ] staff viewed session
 - [ ] staff entered verified facts
@@ -263,6 +284,8 @@ Classify messages as:
 - [ ] User can ask ARIA a general question and get a useful answer.
 - [ ] User can ask an account-specific question and be routed to secure support.
 - [ ] Secure support session persists in Rails.
+- [ ] Participant verification uses fake passwordless email/SMS flow.
+- [ ] Verification endpoints do not reveal whether a contact exists.
 - [ ] Staff can review session, enter fake facts, generate draft, approve response.
 - [ ] User can see approved response in secure chat.
 - [ ] User can submit fake enrollment form.
@@ -304,8 +327,8 @@ End-to-end smoke checks:
 
 ## Implementation branch
 
-Recommended first branch:
+Recommended next branch:
 
 ```text
-feature/rails-react-prototype-foundation
+feature/secure-handoff-workflow
 ```

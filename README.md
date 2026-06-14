@@ -11,7 +11,8 @@ See:
 - `docs/content-and-assets.md` for the public ASC Trust pages/assets reviewed, what was included locally, and the asset-approval boundary.
 - `docs/asc-public-content.md` for the public ASC Trust pages/content checked and the demo-data boundary.
 - `docs/architecture-and-rag-plan.md` for the recommended long-term React + Rails + Airtable/RAG architecture.
-- `docs/secure-support-workflow.md` for the public-to-authenticated ARIA handoff, staff dashboard, Relias bridge, secure form intake opportunity, and admin/audit model.
+- `docs/identity-and-access-plan.md` for the passwordless participant access, Clerk staff auth, Resend/ClickSend delivery, and trusted contact-source boundary.
+- `docs/secure-support-workflow.md` for the public-to-passwordless-secure ARIA handoff, staff dashboard, Relias bridge, secure form intake opportunity, and admin/audit model.
 - `docs/build-readiness-plan.md` for the recommended phased build sequence and acceptance criteria.
 - `docs/rails-backed-prototype-plan.md` for the decided next build direction: a Rails + React prototype app with ARIA chat, simple secure handoff, secure form intake, and admin dashboards.
 - `docs/rails-react-implementation-checklist.md` for the pre-build model/route/screen checklist and acceptance criteria.
@@ -24,20 +25,25 @@ See:
 - ASC-style responsive header with Account Login, Open Account, Contact Us, Request Proposal, public navigation, and discreet demo controls
 - Participant support hub task cards
 - Rails-backed bottom-right public ARIA chat widget with controlled responses, seeded knowledge/plan-rule context, optional OpenRouter, and account-specific secure handoff CTA
-- Fake authenticated secure support page
-- Saved-session participant chat mockup
+- Rails-backed passwordless secure handoff with fake participant directory entries
+- Resend-shaped secure email code flow and ClickSend-shaped SMS code flow, with live sends disabled by default
+- Secure access sessions, secure chat sessions, support requests, delivery logs, and audit events
+- Optional Clerk provider setup for staff/admin sign-in UI and Rails-side Clerk JWT verification for staff endpoints
+- Saved-session participant chat prototype
 - Staff/call-center dashboard queue
 - Staff session detail with fake Relias bridge fields
 - AI draft, staff approve/send, edit, and human-takeover controls
 - Admin/audit preview with governance and traceability metrics
 - Documented future phase for replacing external Jotform/PDF intake with secure in-app forms and staff submission dashboards
-- Rails API foundation under `api/` with fake users/roles, fake Airtable-style plan rules, seeded ARIA knowledge entries, public chat sessions/messages, and audit-event support
+- Rails API foundation under `api/` with fake users/roles, fake Airtable-style plan rules, seeded ARIA knowledge entries, public/secure chat sessions/messages, passwordless verification, support requests, and audit-event support
 
 ## Important boundaries
 
 - Public ASC website copy/images/logos are included for private stakeholder concept review only; production usage should be approved by ASC and replaced with official source assets where possible
 - No real participant data
-- No real authentication
+- No real participant identity/contact sync; participant verification uses fake seeded directory entries unless ASC approves a trusted contact source
+- No live participant email/SMS by default; provider integrations are gated by explicit env flags
+- Optional Clerk staff/admin auth is supported, but Rails still owns roles/permissions/workflow
 - No live AI required; OpenRouter is optional and falls back to deterministic/template responses when unset
 - No Relias, Airtable, Jotform replacement, secure form storage, or ASC integration
 - Demo/sample workflow only
@@ -79,6 +85,15 @@ bin/rails db:prepare
 bin/rails server -p 3000
 ```
 
+Optional Clerk staff/admin sign-in UI:
+
+```bash
+# web/.env.local
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+# Optional custom JWT template name
+VITE_CLERK_JWT_TEMPLATE=asc-aria-api
+```
+
 Optional OpenRouter-backed public ARIA responses. Rails loads `api/.env` locally via `dotenv-rails`:
 
 ```bash
@@ -87,7 +102,29 @@ OPENROUTER_API_KEY=...
 OPENROUTER_MODEL=google/gemini-2.5-flash
 ```
 
-The model is configurable via `OPENROUTER_MODEL`. If no OpenRouter key is present, public ARIA uses deterministic/template fallback responses. Anonymous public chat write endpoints are rate-limited with Rack::Attack (`PUBLIC_CHAT_SESSION_RATE_LIMIT`, `PUBLIC_CHAT_MESSAGE_RATE_LIMIT`, and `PUBLIC_CHAT_RATE_PERIOD_SECONDS`).
+The model is configurable via `OPENROUTER_MODEL`. If no OpenRouter key is present, public ARIA uses deterministic/template fallback responses. Anonymous public chat and secure handoff write endpoints are rate-limited with Rack::Attack.
+
+Optional Rails-side staff auth and passwordless delivery provider env:
+
+```bash
+# Clerk staff/admin JWT verification
+CLERK_JWKS_URL=
+CLERK_ISSUER=
+CLERK_AUDIENCE=
+CLERK_SECRET_KEY=
+
+# Passwordless participant verification providers
+RESEND_API_KEY=
+MAILER_FROM_EMAIL=noreply@example.test
+CLICKSEND_USERNAME=
+CLICKSEND_API_KEY=
+CLICKSEND_SENDER_ID=ASCTrust
+
+# Safety gates; keep disabled unless explicitly testing approved recipients
+LIVE_VERIFICATION_EMAILS_ENABLED=false
+LIVE_VERIFICATION_SMS_ENABLED=false
+DEMO_VERIFICATION_CODES_ENABLED=true
+```
 
 API health check:
 

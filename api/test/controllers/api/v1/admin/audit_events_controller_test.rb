@@ -33,6 +33,22 @@ class Api::V1::Admin::AuditEventsControllerTest < ActionDispatch::IntegrationTes
     end
   end
 
+  test "rejects regular staff Clerk token for admin audit endpoint" do
+    with_admin_token("test-admin-token") do
+      get api_v1_admin_audit_events_url, headers: { "Authorization" => "Bearer test_token_#{users(:staff_user).id}" }
+
+      assert_response :unauthorized
+    end
+  end
+
+  test "accepts supervisor Clerk token for admin audit endpoint" do
+    with_admin_token(nil) do
+      get api_v1_admin_audit_events_url, headers: { "Authorization" => "Bearer test_token_#{users(:supervisor_user).id}" }
+
+      assert_response :success
+    end
+  end
+
   test "accepts bearer admin token" do
     with_admin_token("test-admin-token") do
       get api_v1_admin_audit_events_url, headers: { "Authorization" => "Bearer test-admin-token" }

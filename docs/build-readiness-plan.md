@@ -21,6 +21,7 @@ Already done:
 - Long-term architecture/RAG direction documented in `docs/architecture-and-rag-plan.md`.
 - Secure handoff/staff workflow documented in `docs/secure-support-workflow.md`.
 - Rails-backed prototype direction documented in `docs/rails-backed-prototype-plan.md`.
+- Production-shaped full demo plan documented in `docs/full-end-to-end-demo-plan.md` for the next PR after secure handoff foundation merges.
 - Frontend moved into `web/` and Rails API foundation added under `api/`.
 - Fake users/roles, fake Airtable-style plan rules, controlled ARIA knowledge entries, and audit-event API support added for the first foundation PR.
 - Public ARIA chat sessions/messages, deterministic classification, template fallback responses, optional OpenRouter via Rails, secure handoff CTA, bottom-right chat widget UX, and broader public retirement-plan knowledge added for the controlled chat/widget PRs.
@@ -32,10 +33,11 @@ Do not jump directly into a full production backend unless the goal is a paid pi
 Recommended next build sequence:
 
 1. **Frontend product prototype** — completed enough for stakeholder review; proves the website + ARIA direction.
-2. **Rails + React prototype app** — decided next step; adds persistence, queues, audit events, controlled chatbot behavior, and fake-data form intake.
-3. **Secure form intake expansion** — replace Jotform/PDF intake in concept with app-owned enrollment/request forms and staff submission queues.
-4. **Airtable/RAG integration** — once ASC provides sample Airtable schema/export or approves use of real/sanitized data.
-5. **Security/auth hardening** — once ASC requirements and identity-provider path are known.
+2. **Rails + React prototype app** — secure handoff foundation underway in PR #6.
+3. **Production-shaped full demo** — next branch should implement `docs/full-end-to-end-demo-plan.md`: real Clerk staff/admin flow, admin-created demo participants, real allowlisted email/SMS verification, Rails-backed staff queue, staff response workflow, and real audit dashboard.
+4. **Secure form intake expansion** — replace Jotform/PDF intake in concept with app-owned enrollment/request forms and staff submission queues.
+5. **Airtable/RAG integration** — once ASC provides sample Airtable schema/export or approves use of real/sanitized data.
+6. **Security/auth hardening** — once ASC requirements and identity-provider path are known.
 
 ## What we need before building the real backend
 
@@ -58,7 +60,8 @@ From Leon/Shimizu Technology:
 
 - confirm the next artifact is the Rails-backed prototype vertical slice
 - repo reorganization into `web/` + `api/` is complete in the foundation branch
-- decide whether to use Clerk demo auth, mock auth, or Rails auth for the next stage
+- use passwordless participant verification for the secure handoff prototype, shaped for Resend email and ClickSend SMS
+- use Clerk invite-only login for ASC staff/admins when implementing production-shaped staff auth
 - decide proposal tier/scope before connecting real systems
 
 ## Recommended immediate next step
@@ -83,7 +86,7 @@ The frontend-only POC should demonstrate:
 - public ARIA widget
 - account-specific question detection
 - “Continue securely” CTA
-- fake authentication/verification screen
+- fake passwordless email/SMS verification screen
 - secure ARIA support page
 - saved-session feel
 - staff dashboard queue
@@ -94,7 +97,7 @@ The frontend-only POC should demonstrate:
 - admin/audit preview
 - mobile and desktop responsive behavior
 
-No real auth, real AI, real Airtable, real Relias, or real participant data should be used in this phase.
+No real participant auth/contact sync, real AI with sensitive context, real Airtable, real Relias, real participant data, or live participant email/SMS should be used in this phase.
 
 ---
 
@@ -153,9 +156,9 @@ node web/scripts/mobile-check.mjs
 4. Include privacy/safety copy warning users not to enter SSN/account numbers in public chat.
 5. Run build and viewport checks.
 
-## Task 3: Fake secure authentication page
+## Task 3: Fake passwordless secure verification page
 
-**Objective:** Demonstrate the transition from public chat to authenticated support without implementing real auth.
+**Objective:** Demonstrate the transition from public chat to passwordless secure support without real participant data or live email/SMS sends.
 
 **Files:**
 
@@ -163,10 +166,11 @@ node web/scripts/mobile-check.mjs
 
 **Steps:**
 
-1. Add a secure-auth screen with:
+1. Add a secure verification screen with:
    - “Continue to secure ARIA support” heading
-   - safe explanation of why authentication is required
-   - fake verification checklist
+   - safe explanation of why ASC needs to verify the participant before account-specific support
+   - fake email/SMS code option shaped for Resend and ClickSend
+   - generic anti-enumeration copy: “If that information matches ASC records, we’ll send a secure code.”
    - button: `Verify and continue`
 2. Preserve context from the public question visually:
    - topic: 401(k) loan
@@ -333,9 +337,13 @@ Role
 ParticipantProfile
 StaffProfile
 PublicChatSession
+ParticipantDirectoryEntry
+SecureAccessSession
 SecureChatSession
 ChatMessage
 HandoffToken
+VerificationChallenge
+OutboundDelivery
 SupportRequest
 StaffReview
 StaffVerifiedFact
@@ -359,7 +367,9 @@ FormSubmissionExport
 
 ```text
 POST /api/v1/handoffs
-POST /api/v1/handoffs/:token/verify_demo
+GET  /api/v1/handoffs/:token
+POST /api/v1/handoffs/:token/verification_challenges
+POST /api/v1/handoffs/:token/verification_challenges/:id/verify
 GET  /api/v1/secure_chat_sessions/:id
 POST /api/v1/secure_chat_sessions/:id/messages
 GET  /api/v1/staff/sessions
