@@ -21,20 +21,29 @@ module SecureSupport
       code = generate_code
       challenge = nil
       delivery = nil
+      reused_challenge = false
 
       HandoffToken.transaction do
-        challenge = create_challenge!(participant: participant, contact: normalized_contact, code: code)
-        challenge.update!(status: "sent", sent_at: Time.current, metadata: challenge.metadata.merge(unmatched_contact: true)) unless participant
-        handoff_token.mark_challenge_sent!
+        locked_handoff = HandoffToken.lock.find(handoff_token.id)
+        raise ArgumentError, "Handoff token is expired or unavailable" unless locked_handoff.available_for_challenge?
+
+        challenge = reusable_challenge_for(locked_handoff, normalized_contact)
+        reused_challenge = challenge.present?
+
+        unless reused_challenge
+          challenge = create_challenge!(handoff: locked_handoff, participant: participant, contact: normalized_contact, code: code)
+          challenge.update!(status: "sent", sent_at: Time.current, metadata: challenge.metadata.merge(unmatched_contact: true)) unless participant
+          locked_handoff.mark_challenge_sent!
+        end
       end
 
-      delivery = VerificationDelivery.deliver!(challenge: challenge, code: code, contact: normalized_contact) if participant
-      record_audit_event_safely(challenge: challenge, participant: participant)
+      delivery = VerificationDelivery.deliver!(challenge: challenge, code: code, contact: normalized_contact) if participant && !reused_challenge
+      record_audit_event_safely(challenge: challenge, participant: participant, reused_challenge: reused_challenge)
 
       Result.new(
         challenge: challenge,
         delivery: delivery,
-        demo_code: demo_code_for_response(participant, code),
+        demo_code: demo_code_for_response(participant, code, reused_challenge: reused_challenge),
         message: GENERIC_MESSAGE
       )
     end
@@ -51,10 +60,22 @@ module SecureSupport
       end
     end
 
-    def create_challenge!(participant:, contact:, code:)
+    def reusable_challenge_for(locked_handoff, contact)
+      locked_handoff.verification_challenges
+        .where(
+          channel: channel,
+          contact_digest: SecureSupport::Contact.digest(contact),
+          status: %w[pending sent]
+        )
+        .where("expires_at > ?", Time.current)
+        .order(created_at: :desc)
+        .first
+    end
+
+    def create_challenge!(handoff:, participant:, contact:, code:)
       token = SecureRandom.urlsafe_base64(VerificationChallenge::TOKEN_BYTES)
       VerificationChallenge.create!(
-        handoff_token: handoff_token,
+        handoff_token: handoff,
         participant_directory_entry: participant,
         token: token,
         channel: channel,
@@ -65,7 +86,7 @@ module SecureSupport
       )
     end
 
-    def record_audit_event_safely(challenge:, participant:)
+    def record_audit_event_safely(challenge:, participant:, reused_challenge: false)
       AuditEvent.record!(
         action: "verification_challenge_requested",
         auditable: challenge,
@@ -74,6 +95,7 @@ module SecureSupport
           channel: channel,
           contact_masked: challenge.contact_masked,
           matched_directory_entry: participant.present?,
+          reused_challenge: reused_challenge,
           fake_data_only: true
         }
       )
@@ -85,7 +107,8 @@ module SecureSupport
       SecureRandom.random_number(1_000_000).to_s.rjust(6, "0")
     end
 
-    def demo_code_for_response(participant, code)
+    def demo_code_for_response(participant, code, reused_challenge: false)
+      return nil if reused_challenge
       return nil unless participant
       return nil unless VerificationDelivery.demo_codes_enabled?
 

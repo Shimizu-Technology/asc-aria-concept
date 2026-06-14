@@ -44,6 +44,41 @@ class Api::V1::VerificationChallengesControllerTest < ActionDispatch::Integratio
     assert AuditEvent.where(action: "verification_challenge_requested").exists?
   end
 
+  test "duplicate same-contact challenge request reuses active challenge without sending another code" do
+    first_token = nil
+    second_token = nil
+
+    assert_difference -> { VerificationChallenge.count }, 1 do
+      assert_difference -> { OutboundDelivery.count }, 1 do
+        post api_v1_handoff_verification_challenges_url(@handoff.token), params: {
+          verification_challenge: {
+            channel: "email",
+            contact: "malia.demo@example.test"
+          }
+        }
+        assert_response :created
+        first_body = JSON.parse(response.body)
+        first_token = first_body.fetch("challenge").fetch("token")
+        assert_match(/\A\d{6}\z/, first_body.fetch("challenge").fetch("demo_code"))
+
+        post api_v1_handoff_verification_challenges_url(@handoff.token), params: {
+          verification_challenge: {
+            channel: "email",
+            contact: "MALIA.DEMO@example.test"
+          }
+        }
+        assert_response :created
+        second_body = JSON.parse(response.body)
+        second_token = second_body.fetch("challenge").fetch("token")
+        assert_nil second_body.fetch("challenge")["demo_code"]
+      end
+    end
+
+    assert_equal first_token, second_token
+    assert_equal "challenge_sent", @handoff.reload.status
+    assert AuditEvent.where(action: "verification_challenge_requested", auditable: VerificationChallenge.find_by!(token: first_token)).count >= 2
+  end
+
   test "challenge request does not reveal directory match through public handoff status" do
     matched_handoff = HandoffToken.create!(intent: "participant_specific", topic: "401(k) loan eligibility")
     unmatched_handoff = HandoffToken.create!(intent: "participant_specific", topic: "401(k) loan eligibility")
