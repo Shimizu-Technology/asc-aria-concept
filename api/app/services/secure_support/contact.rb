@@ -67,7 +67,7 @@ module SecureSupport
     end
 
     def digest_secret
-      ENV["CONTACT_DIGEST_SECRET"].presence || Rails.application.secret_key_base
+      SecureSupport::Secrets.fetch("CONTACT_DIGEST_SECRET")
     end
   end
 end

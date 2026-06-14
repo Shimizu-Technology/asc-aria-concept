@@ -70,7 +70,7 @@ class VerificationChallenge < ApplicationRecord
   end
 
   def self.code_secret
-    ENV["VERIFICATION_CODE_SECRET"].presence || Rails.application.secret_key_base
+    SecureSupport::Secrets.fetch("VERIFICATION_CODE_SECRET")
   end
 
   def as_api_json(include_delivery: true, demo_code: nil)

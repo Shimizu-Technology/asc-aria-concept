@@ -37,5 +37,21 @@ module ActiveSupport
         end
       end
     end
+
+    def with_env(overrides)
+      previous = overrides.each_with_object({}) do |(key, _value), memo|
+        memo[key] = ENV.key?(key) ? ENV[key] : :__missing__
+      end
+
+      overrides.each do |key, value|
+        value.nil? ? ENV.delete(key) : ENV[key] = value
+      end
+
+      yield
+    ensure
+      previous&.each do |key, value|
+        value == :__missing__ ? ENV.delete(key) : ENV[key] = value
+      end
+    end
   end
 end

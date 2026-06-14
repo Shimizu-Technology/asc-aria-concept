@@ -1,6 +1,22 @@
+require "net/http"
+require "openssl"
+require "timeout"
+
 class ClerkAuth
   JWKS_CACHE_KEY = "clerk_jwks"
   JWKS_CACHE_TTL = 1.hour
+  CLERK_NETWORK_ERRORS = [
+    HTTParty::Error,
+    Timeout::Error,
+    SocketError,
+    Errno::ECONNREFUSED,
+    Errno::ECONNRESET,
+    Errno::EHOSTUNREACH,
+    Errno::ENETUNREACH,
+    Net::OpenTimeout,
+    Net::ReadTimeout,
+    OpenSSL::SSL::SSLError
+  ].freeze
 
   class << self
     def configured?
@@ -42,8 +58,8 @@ class ClerkAuth
       addresses = data["email_addresses"] || []
       primary = addresses.find { |address| address["id"] == primary_id } || addresses.first
       primary&.dig("email_address")
-    rescue HTTParty::Error, Timeout::Error => e
-      Rails.logger.warn("[ClerkAuth] Clerk API email fallback failed: #{e.message}")
+    rescue *CLERK_NETWORK_ERRORS => e
+      Rails.logger.warn("[ClerkAuth] Clerk API email fallback failed: #{e.class}: #{e.message}")
       nil
     end
 
@@ -68,6 +84,8 @@ class ClerkAuth
 
         response.parsed_response
       end
+    rescue *CLERK_NETWORK_ERRORS => e
+      raise JWT::DecodeError, "JWKS fetch failed: #{e.class}: #{e.message}"
     end
 
     def jwks_url
